@@ -404,7 +404,8 @@ export async function validateOrderPrices(cartItems, customerUser = null) {
 
 export async function logAdminAction(action, targetType, targetId, details = {}) {
   try {
-    const adminUser = localStorage.getItem('userName') || 'Admin';
+    let adminUser = localStorage.getItem('userName') || 'Hakim';
+    if (!adminUser || adminUser.toLowerCase().includes('wahbi')) adminUser = 'Hakim';
     await addDoc(collection(db, "audit_logs"), {
       action,
       targetType,

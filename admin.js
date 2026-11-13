@@ -1049,10 +1049,11 @@ export function loadAuditLogs() {
 
     tbody.innerHTML = allAuditLogs.map(log => {
       const detailsStr = log.details ? JSON.stringify(log.details) : '—';
+      const adminDisplayName = (log.adminUser && log.adminUser.toLowerCase().includes('wahbi')) ? 'Hakim' : (log.adminUser || 'Hakim');
       return `
         <tr>
           <td>${formatDateTime(log.timestamp)}</td>
-          <td><span style="font-weight:600; color:var(--primary);">${log.adminUser || 'Admin'}</span></td>
+          <td><span style="font-weight:600; color:var(--primary);">${adminDisplayName}</span></td>
           <td><span class="status-badge status-accepted" style="font-size:0.75rem;">${log.action}</span></td>
           <td>${log.targetType || '—'}</td>
           <td><code>${log.targetId || '—'}</code></td>

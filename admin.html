@@ -993,13 +993,13 @@
     (function loadUserInfo() {
       let userName = localStorage.getItem('userName');
       if (!userName || userName.toLowerCase().includes('wahbi')) {
-        userName = 'Hakim';
-        localStorage.setItem('userName', 'Hakim');
+        userName = 'Hakim Chenan';
+        localStorage.setItem('userName', 'Hakim Chenan');
       }
       const userNameEl = document.getElementById('userName');
       const userAvatarEl = document.getElementById('userAvatar');
       if (userNameEl) userNameEl.textContent = userName;
-      if (userAvatarEl) userAvatarEl.textContent = userName.charAt(0).toUpperCase();
+      if (userAvatarEl) userAvatarEl.textContent = 'H';
     })();
 
     // 🔐 دالة تسجيل الخروج
