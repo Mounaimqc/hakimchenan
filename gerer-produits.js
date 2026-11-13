@@ -5,6 +5,26 @@ import { db } from './firebase-config.js';
 
 let allProducts = [];
 
+export function sanitizeImageUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    url = url.trim();
+    if (!url) return '';
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') && !url.startsWith('blob:')) {
+        url = 'https://' + url;
+    }
+    if (url.includes('/_next/image') || url.includes('/_ipx/')) {
+        try {
+            const parsed = new URL(url);
+            const target = parsed.searchParams.get('url');
+            if (target) return decodeURIComponent(target);
+        } catch (e) {
+            const match = url.match(/[?&]url=([^&]+)/);
+            if (match) return decodeURIComponent(match[1]);
+        }
+    }
+    return url;
+}
+
 // ==========================================
 // 📦 PRODUCTS LOADING & DISPLAY
 // ==========================================
@@ -48,8 +68,9 @@ function displayProducts(products) {
         const qty = parseInt(p.quantity) || 0;
         const statusClass = qty > 0 ? 'status-in-stock' : 'status-out-of-stock';
         const statusLabel = qty > 0 ? `${qty} en stock` : `Rupture`;
-        const imagePreview = p.image ? 
-            `<img src="${p.image}" class="product-img-td" alt="${p.name}" onerror="this.src='https://via.placeholder.com/60'">` : 
+        const validImg = sanitizeImageUrl(p.image);
+        const imagePreview = validImg ? 
+            `<img src="${validImg}" class="product-img-td" alt="${p.name}" onerror="this.src='https://via.placeholder.com/60'">` : 
             `<div class="product-img-td" style="display:flex;align-items:center;justify-content:center;background:#222;color:#888;"><i class="fa-solid fa-image"></i></div>`;
 
         const resellerPrice = parseFloat(p.reseller_price) || 0;
@@ -388,7 +409,7 @@ document.getElementById('editProductForm')?.addEventListener('submit', async (e)
                 imageUrl = await uploadImage(file);
             }
         } else {
-            imageUrl = document.getElementById('editProductImage')?.value.trim();
+            imageUrl = sanitizeImageUrl(document.getElementById('editProductImage')?.value.trim());
         }
 
         if (!id || !name || !imageUrl || !category || isNaN(price) || price <= 0) {
@@ -408,7 +429,7 @@ document.getElementById('editProductForm')?.addEventListener('submit', async (e)
             const isUrlMode = item.querySelector('.flavor-mode-url')?.style.background === 'var(--primary)';
             
             if (isUrlMode) {
-                fImg = item.querySelector('.flavor-image-url')?.value.trim();
+                fImg = sanitizeImageUrl(item.querySelector('.flavor-image-url')?.value.trim());
             } else {
                 const fFile = item.querySelector('.flavor-image-file')?.files[0];
                 if (fFile) {

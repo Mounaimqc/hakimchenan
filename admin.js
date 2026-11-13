@@ -16,6 +16,26 @@ let allAuditLogs = [];
 let currentSelectedCustomer = null;
 let currentTab = 'commandes';
 
+export function sanitizeImageUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  url = url.trim();
+  if (!url) return '';
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') && !url.startsWith('blob:')) {
+    url = 'https://' + url;
+  }
+  if (url.includes('/_next/image') || url.includes('/_ipx/')) {
+    try {
+      const parsed = new URL(url);
+      const target = parsed.searchParams.get('url');
+      if (target) return decodeURIComponent(target);
+    } catch (e) {
+      const match = url.match(/[?&]url=([^&]+)/);
+      if (match) return decodeURIComponent(match[1]);
+    }
+  }
+  return url;
+}
+
 // ==========================================
 // 🔄 TAB SWITCHING
 // ==========================================
@@ -1074,7 +1094,7 @@ document.getElementById('addProductForm')?.addEventListener('submit', async (e) 
         imageUrl = await uploadImage(file);
       }
     } else {
-      imageUrl = document.getElementById('productImage')?.value.trim();
+      imageUrl = sanitizeImageUrl(document.getElementById('productImage')?.value.trim());
     }
 
     if (!name || !imageUrl || !category || isNaN(price) || price <= 0) {
@@ -1092,7 +1112,7 @@ document.getElementById('addProductForm')?.addEventListener('submit', async (e) 
       const fName = fNameInput?.value.trim();
       const fUrl = fUrlInput?.value.trim();
       if (fName) {
-        flavors.push({ name: fName, image: fUrl || imageUrl });
+        flavors.push({ name: fName, image: sanitizeImageUrl(fUrl) || imageUrl });
       }
     }
 

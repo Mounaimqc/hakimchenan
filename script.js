@@ -25,8 +25,32 @@ function shuffleArray(array) {
   }
 }
 
-// ========== PLACEHOLDER IMAGE (SVG Inline) ==========
+// ========== PLACEHOLDER & IMAGE SANITIZER ==========
 const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect fill='%23f3f4f6' width='300' height='200'/%3E%3Ccircle cx='150' cy='80' r='40' fill='%23d1d5db'/%3E%3Crect x='60' y='140' width='180' height='20' rx='10' fill='%23d1d5db'/%3E%3Ctext x='50%25' y='185' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle'%3EImage non disponible%3C/text%3E%3C/svg%3E`;
+
+export function sanitizeImageUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  url = url.trim();
+  if (!url) return '';
+  // Fix protocol if missing
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') && !url.startsWith('blob:')) {
+    url = 'https://' + url;
+  }
+  // If URL is a Next.js / Nuxt / external image proxy (e.g. coach.novasell.store/_next/image?url=...)
+  if (url.includes('/_next/image') || url.includes('/_ipx/')) {
+    try {
+      const parsed = new URL(url);
+      const target = parsed.searchParams.get('url');
+      if (target) {
+        return decodeURIComponent(target);
+      }
+    } catch (e) {
+      const match = url.match(/[?&]url=([^&]+)/);
+      if (match) return decodeURIComponent(match[1]);
+    }
+  }
+  return url;
+}
 
 // ========== INITIALISATION ==========
 document.addEventListener('DOMContentLoaded', async function () {
@@ -127,10 +151,10 @@ async function loadProductsFromFirebase() {
         reseller_pricing_enabled: (data.reseller_pricing_enabled === true || data.reseller_pricing_enabled === 'true'),
         category: data.category || 'Autre',
         description: data.description || '',
-        image: data.image || '',
+        image: sanitizeImageUrl(data.image || ''),
         quantity: parseInt(data.quantity) || 0,
         dateAdded: data.dateAdded,
-        flavors: data.flavors || [],
+        flavors: (data.flavors || []).map(f => ({ ...f, image: sanitizeImageUrl(f.image || '') })),
         ingredients: data.ingredients || []
       });
     });
@@ -274,7 +298,8 @@ function loadProducts() {
     });
 
     const img = document.createElement('img');
-    img.src = (product.image && product.image.trim()) ? product.image : 'https://via.placeholder.com/300x200?text=Produit';
+    const validImg = sanitizeImageUrl(product.image);
+    img.src = validImg || 'https://via.placeholder.com/300x200?text=Produit';
     img.alt = product.name;
     img.className = 'product-image';
     img.onerror = function () {
