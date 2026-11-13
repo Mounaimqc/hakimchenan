@@ -101,13 +101,28 @@ function displayProducts(products) {
 // 🔍 FILTERS & UTILITIES
 // ==========================================
 
+function normalizeCategory(cat) {
+    if (!cat) return '';
+    const c = cat.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (c.includes('bruleur') || c.includes('fat burner') || c.includes('graisse') || c.includes('burner')) return 'Fat Burners';
+    if (c.includes('whey') || c.includes('proteine') || c.includes('isolate')) return 'Whey Protein';
+    if (c.includes('vitamine') || c.includes('sante') || c.includes('health') || c.includes('omega') || c.includes('zinc')) return 'Vitamines & Santé';
+    if (c.includes('pre-workout') || c.includes('pre workout') || c.includes('booster') || c.includes('energie') || c.includes('energy') || c.includes('force')) return 'Pre-Workout';
+    if (c.includes('gainer') || c.includes('masse')) return 'Mass Gainer';
+    if (c.includes('creatine')) return 'Créatine';
+    if (c.includes('bcaa') || c.includes('eaa') || c.includes('amine') || c.includes('amino')) return 'BCAA & EAA';
+    return cat;
+}
+
 function filterProducts() {
     const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
     const category = document.getElementById('filterCategory')?.value || '';
+    const normTarget = normalizeCategory(category);
 
     const filtered = allProducts.filter(p => {
         const matchSearch = p.name?.toLowerCase().includes(search) || p.description?.toLowerCase().includes(search);
-        return matchSearch && (!category || p.category === category);
+        const matchCat = !category || p.category === category || normalizeCategory(p.category) === normTarget;
+        return matchSearch && matchCat;
     });
     displayProducts(filtered);
 }

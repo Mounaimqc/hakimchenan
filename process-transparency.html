@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Process Product Transparency</title>
+</head>
+<body style="background:#111; color:#fff; font-family:sans-serif;">
+  <h2>Suppression des arrière-plans des produits...</h2>
+  <div id="log"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    function log(msg) {
+      logEl.innerHTML += `<div>${msg}</div>`;
+      console.log(msg);
+    }
+
+    const imagesToProcess = [
+      {
+        src: 'images/products/biotech-creatine.webp',
+        outName: 'biotech-creatine-transparent.png',
+        bgType: 'white'
+      },
+      {
+        src: 'images/products/scitec-jumbo.webp',
+        outName: 'scitec-jumbo-transparent.png',
+        bgType: 'white'
+      },
+      {
+        src: 'images/products/xtend-bcaa.webp',
+        outName: 'xtend-bcaa-transparent.png',
+        bgType: 'white'
+      },
+      {
+        src: 'images/products/nitrotech-ripped.webp',
+        outName: 'nitrotech-ripped-transparent.png',
+        bgType: 'black'
+      }
+    ];
+
+    function removeBackground(img, bgType) {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      // Visited array
+      const visited = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let qStart = 0;
+      let qEnd = 0;
+
+      function isBgPixel(r, g, b) {
+        if (bgType === 'white') {
+          // White or near white / light grey shadow
+          return r > 230 && g > 230 && b > 230;
+        } else {
+          // Black or near black
+          return r < 25 && g < 25 && b < 25;
+        }
+      }
+
+      // Initialize queue with all 4 borders
+      for (let x = 0; x < w; x++) {
+        // top border
+        let idx = x;
+        let pIdx = idx * 4;
+        if (isBgPixel(data[pIdx], data[pIdx+1], data[pIdx+2])) {
+          visited[idx] = 1;
+          queue[qEnd++] = idx;
+        }
+        // bottom border
+        idx = (h - 1) * w + x;
+        pIdx = idx * 4;
+        if (isBgPixel(data[pIdx], data[pIdx+1], data[pIdx+2])) {
+          visited[idx] = 1;
+          queue[qEnd++] = idx;
+        }
+      }
+
+      for (let y = 0; y < h; y++) {
+        // left border
+        let idx = y * w;
+        let pIdx = idx * 4;
+        if (!visited[idx] && isBgPixel(data[pIdx], data[pIdx+1], data[pIdx+2])) {
+          visited[idx] = 1;
+          queue[qEnd++] = idx;
+        }
+        // right border
+        idx = y * w + (w - 1);
+        pIdx = idx * 4;
+        if (!visited[idx] && isBgPixel(data[pIdx], data[pIdx+1], data[pIdx+2])) {
+          visited[idx] = 1;
+          queue[qEnd++] = idx;
+        }
+      }
+
+      // Flood fill BFS
+      while (qStart < qEnd) {
+        const curr = queue[qStart++];
+        const cx = curr % w;
+        const cy = Math.floor(curr / w);
+
+        // 4 neighbors
+        const neighbors = [
+          cy > 0 ? curr - w : -1,
+          cy < h - 1 ? curr + w : -1,
+          cx > 0 ? curr - 1 : -1,
+          cx < w - 1 ? curr + 1 : -1
+        ];
+
+        for (let n of neighbors) {
+          if (n >= 0 && !visited[n]) {
+            const pIdx = n * 4;
+            if (isBgPixel(data[pIdx], data[pIdx+1], data[pIdx+2])) {
+              visited[n] = 1;
+              queue[qEnd++] = n;
+            }
+          }
+        }
+      }
+
+      // Set alpha to 0 for all connected background pixels
+      for (let i = 0; i < w * h; i++) {
+        if (visited[i]) {
+          data[i * 4 + 3] = 0;
+        }
+      }
+
+      // Smooth edge antialiasing (1-pixel feather)
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = y * w + x;
+          if (!visited[idx]) {
+            // Check if adjacent to background
+            if (visited[idx - 1] || visited[idx + 1] || visited[idx - w] || visited[idx + w]) {
+              const pIdx = idx * 4;
+              const r = data[pIdx];
+              const g = data[pIdx+1];
+              const b = data[pIdx+2];
+              if (bgType === 'white') {
+                const whiteness = Math.min(r, g, b) / 255;
+                if (whiteness > 0.75) {
+                  data[pIdx + 3] = Math.round(255 * (1 - (whiteness - 0.75) / 0.25 * 0.8));
+                }
+              } else {
+                const blackness = 1 - Math.max(r, g, b) / 255;
+                if (blackness > 0.75) {
+                  data[pIdx + 3] = Math.round(255 * (1 - (blackness - 0.75) / 0.25 * 0.8));
+                }
+              }
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return canvas;
+    }
+
+    async function processAll() {
+      for (let item of imagesToProcess) {
+        log(`Traitement de ${item.src}...`);
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = item.src;
+        });
+
+        const canvas = removeBackground(img, item.bgType);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        
+        log(`Envoi de ${item.outName} (${(blob.size / 1024).toFixed(0)} KB)...`);
+        await fetch(`/save-image?name=${encodeURIComponent(item.outName)}`, {
+          method: 'POST',
+          body: blob
+        });
+        log(`✅ ${item.outName} enregistré !`);
+      }
+
+      log('🎉 Tous les arrière-plans ont été supprimés avec succès !');
+      await fetch('/done', { method: 'POST' });
+    }
+
+    processAll().catch(err => {
+      log('❌ Erreur: ' + err.message);
+    });
+  </script>
+</body>
+</html>

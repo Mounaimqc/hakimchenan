@@ -235,12 +235,29 @@ function initCategoriesSlider() {
   newPrevBtn.disabled = true;
 }
 
+// Normalisation intelligente des catégories (compatibilité ancien / nouveau catalogue)
+function normalizeCategory(cat) {
+  if (!cat) return '';
+  const c = cat.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (c.includes('bruleur') || c.includes('fat burner') || c.includes('graisse') || c.includes('burner')) return 'Fat Burners';
+  if (c.includes('whey') || c.includes('proteine') || c.includes('isolate')) return 'Whey Protein';
+  if (c.includes('vitamine') || c.includes('sante') || c.includes('health') || c.includes('omega') || c.includes('zinc')) return 'Vitamines & Santé';
+  if (c.includes('pre-workout') || c.includes('pre workout') || c.includes('booster') || c.includes('energie') || c.includes('energy') || c.includes('force')) return 'Pre-Workout';
+  if (c.includes('gainer') || c.includes('masse')) return 'Mass Gainer';
+  if (c.includes('creatine')) return 'Créatine';
+  if (c.includes('bcaa') || c.includes('eaa') || c.includes('amine') || c.includes('amino')) return 'BCAA & EAA';
+  return cat;
+}
+
 function filterProductsByCategory(category) {
+  const normTarget = normalizeCategory(category);
   allFilteredProducts = products.filter(product => {
     const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
     const matchesSearch = product.name?.toLowerCase().includes(searchTerm) ||
       (product.description && product.description.toLowerCase().includes(searchTerm));
-    const matchesCategory = category === 'all' || product.category === category;
+    const matchesCategory = category === 'all' || 
+      normalizeCategory(product.category) === normTarget ||
+      product.category === category;
     return matchesSearch && matchesCategory;
   });
   
@@ -251,28 +268,31 @@ function filterProductsByCategory(category) {
 function updateCategoryCounts(productList = products) {
   const counts = {
     'all': productList.length,
-    'Protéines whey': 0,
-    'Creatine': 0,
-    'Masse / Gainer': 0,
-    'Acide aminé': 0,
-    'Force / Energie': 0,
-    'Brûleur de graisse': 0
+    'Fat Burners': 0,
+    'Whey Protein': 0,
+    'Vitamines & Santé': 0,
+    'Pre-Workout': 0,
+    'Mass Gainer': 0,
+    'Créatine': 0,
+    'BCAA & EAA': 0
   };
   
   productList.forEach(product => {
-    if (counts[product.category] !== undefined) {
-      counts[product.category]++;
+    const norm = normalizeCategory(product.category);
+    if (counts[norm] !== undefined) {
+      counts[norm]++;
     }
   });
   
   const setEl = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
   setEl('count-all', counts['all']);
-  setEl('count-whey', counts['Protéines whey']);
-  setEl('count-creatine', counts['Creatine']);
-  setEl('count-mass', counts['Masse / Gainer']);
-  setEl('count-amino', counts['Acide aminé']);
-  setEl('count-energy', counts['Force / Energie']);
-  setEl('count-burner', counts['Brûleur de graisse']);
+  setEl('count-fat-burners', counts['Fat Burners']);
+  setEl('count-whey-protein', counts['Whey Protein']);
+  setEl('count-vitamines', counts['Vitamines & Santé']);
+  setEl('count-pre-workout', counts['Pre-Workout']);
+  setEl('count-mass-gainer', counts['Mass Gainer']);
+  setEl('count-creatine', counts['Créatine']);
+  setEl('count-bcaa-eaa', counts['BCAA & EAA']);
 }
 
 // ========== AFFICHAGE DES PRODUITS AVEC TARIFS REVENDEURS ==========
@@ -672,11 +692,14 @@ function filterProducts() {
   const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
   const activeCard = document.querySelector('.category-card.active');
   const selectedCategory = activeCard ? activeCard.getAttribute('data-category') : 'all';
+  const normTarget = normalizeCategory(selectedCategory);
 
   allFilteredProducts = products.filter(product => {
     const matchesSearch = product.name?.toLowerCase().includes(searchTerm) ||
       (product.description && product.description.toLowerCase().includes(searchTerm));
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || 
+      normalizeCategory(product.category) === normTarget ||
+      product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
