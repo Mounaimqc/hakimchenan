@@ -898,12 +898,12 @@
       <!-- Title -->
       <div class="tracking-title">
         <h1>📦 Suivi de Commande</h1>
-        <p>Entrez votre numéro de commande pour consulter son statut</p>
+        <p>Entrez votre <strong>numéro de commande</strong> ou votre <strong>numéro de téléphone</strong></p>
       </div>
 
       <!-- Search Form -->
       <form class="search-form" id="trackingForm">
-        <input type="text" class="search-input" id="orderNumber" placeholder="Ex: HCN260303001 ou PZ260303001" required maxlength="20">
+        <input type="text" class="search-input" id="orderNumber" placeholder="Ex: HCN260303001 ou 0550 12 34 56" required maxlength="30">
         <button type="submit" class="search-btn">
           <i class="fa-solid fa-search"></i> Rechercher
         </button>
@@ -915,8 +915,16 @@
         <span>Commande introuvable. Veuillez vérifier le numéro et réessayer.</span>
       </div>
 
+      <!-- Phone Orders List (when multiple orders are found) -->
+      <div id="phoneOrdersList" style="display:none; margin-top:24px;"></div>
+
       <!-- Tracking Result -->
       <div id="trackingResult" style="display:none">
+        <div id="backToListBtnContainer" style="display:none; margin-bottom:16px;">
+          <button type="button" id="backToListBtn" class="btn btn-outline" style="padding:6px 14px; font-size:0.85rem; border-radius:var(--radius);">
+            <i class="fa-solid fa-arrow-left"></i> Voir toutes mes commandes
+          </button>
+        </div>
         
         <!-- Status Timeline -->
         <div class="status-timeline">
@@ -1065,16 +1073,23 @@
     import { db } from './firebase-config.js';
     import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    let currentFoundOrders = [];
+
     document.getElementById('trackingForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const orderNumber = document.getElementById('orderNumber').value.trim().toUpperCase();
+      const inputVal = document.getElementById('orderNumber').value.trim();
+      await executeTrackingSearch(inputVal);
+    });
+
+    async function executeTrackingSearch(inputVal) {
       const errorMsg = document.getElementById('errorMessage');
       const result = document.getElementById('trackingResult');
+      const listContainer = document.getElementById('phoneOrdersList');
+      const backBtnContainer = document.getElementById('backToListBtnContainer');
       const searchBtn = document.querySelector('.search-btn');
 
-      if (!orderNumber) {
-        showError('Veuillez entrer un numéro de commande');
+      if (!inputVal) {
+        showError('Veuillez entrer un numéro de commande ou de téléphone');
         return;
       }
 
@@ -1082,19 +1097,67 @@
       searchBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Recherche...';
       errorMsg.classList.remove('show');
       result.style.display = 'none';
+      if (listContainer) listContainer.style.display = 'none';
+      if (backBtnContainer) backBtnContainer.style.display = 'none';
 
       try {
-        const q = query(collection(db, "commandes"), where("orderNumber", "==", orderNumber));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          showError('Aucune commande trouvée avec ce numéro');
+        const ordersMap = new Map();
+        const upperQuery = inputVal.toUpperCase();
+        const digitsOnly = inputVal.replace(/[\s\-\.\(\)]/g, '');
+
+        // 1. Recherche par numéro de commande exact
+        const qOrder = query(collection(db, "commandes"), where("orderNumber", "==", upperQuery));
+        const snapOrder = await getDocs(qOrder);
+        snapOrder.docs.forEach(d => ordersMap.set(d.id, { id: d.id, ...d.data() }));
+
+        // 2. Recherche par numéro de téléphone (phone1 et phone2)
+        const isPotentialPhone = /^[0-9\+]{8,15}$/.test(digitsOnly) || 
+                                 digitsOnly.startsWith('05') || digitsOnly.startsWith('06') || 
+                                 digitsOnly.startsWith('07') || digitsOnly.startsWith('0') || 
+                                 digitsOnly.startsWith('+213') || digitsOnly.startsWith('213');
+
+        if (ordersMap.size === 0 || isPotentialPhone) {
+          const phoneVariants = new Set([inputVal, digitsOnly]);
+          if (digitsOnly.startsWith('213') && digitsOnly.length > 9) {
+            phoneVariants.add('0' + digitsOnly.slice(3));
+          } else if (digitsOnly.startsWith('+213') && digitsOnly.length > 10) {
+            phoneVariants.add('0' + digitsOnly.slice(4));
+          } else if (digitsOnly.startsWith('0') && digitsOnly.length === 10) {
+            phoneVariants.add('+213' + digitsOnly.slice(1));
+            phoneVariants.add('213' + digitsOnly.slice(1));
+          }
+
+          for (const p of phoneVariants) {
+            const qPhone1 = query(collection(db, "commandes"), where("phone1", "==", p));
+            const snap1 = await getDocs(qPhone1);
+            snap1.docs.forEach(d => ordersMap.set(d.id, { id: d.id, ...d.data() }));
+
+            const qPhone2 = query(collection(db, "commandes"), where("phone2", "==", p));
+            const snap2 = await getDocs(qPhone2);
+            snap2.docs.forEach(d => ordersMap.set(d.id, { id: d.id, ...d.data() }));
+          }
+        }
+
+        const orders = Array.from(ordersMap.values());
+
+        // Tri par date décroissante
+        orders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        currentFoundOrders = orders;
+
+        if (orders.length === 0) {
+          showError(`Aucune commande trouvée pour "${inputVal}". Veuillez vérifier le numéro de commande ou de téléphone.`);
           return;
         }
 
-        const order = snapshot.docs[0].data();
-        displayTracking(order);
-        
+        if (orders.length === 1) {
+          // Une seule commande : affichage direct du suivi
+          if (backBtnContainer) backBtnContainer.style.display = 'none';
+          displayTracking(orders[0]);
+        } else {
+          // Plusieurs commandes trouvées pour ce numéro de téléphone
+          displayOrdersList(orders, inputVal);
+        }
+
       } catch (error) {
         console.error("Erreur de suivi:", error);
         showError('Erreur de connexion. Veuillez réessayer ultérieurement.');
@@ -1102,13 +1165,97 @@
         searchBtn.disabled = false;
         searchBtn.innerHTML = '<i class="fa-solid fa-search"></i> Rechercher';
       }
-    });
+    }
+
+    function displayOrdersList(orders, queryStr) {
+      const listContainer = document.getElementById('phoneOrdersList');
+      const result = document.getElementById('trackingResult');
+      if (!listContainer) return;
+
+      result.style.display = 'none';
+      listContainer.style.display = 'block';
+
+      listContainer.innerHTML = `
+        <div style="background:var(--pz-cream); border:1px solid var(--pz-light); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
+          <h3 style="font-size:1.1rem; font-family:'Montserrat',sans-serif; color:var(--pz-onyx); margin-bottom:4px;">
+            <i class="fa-solid fa-list-check" style="color:var(--pz-gold);"></i> ${orders.length} commandes trouvées pour "${queryStr}"
+          </h3>
+          <p style="font-size:0.85rem; color:var(--pz-grey); margin:0;">
+            Sélectionnez une commande pour consulter son suivi en temps réel :
+          </p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          ${orders.map((o, idx) => {
+            const dateStr = o.date ? new Date(o.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+            const itemsCount = Array.isArray(o.cartItems) ? o.cartItems.length : (Array.isArray(o.products) ? o.products.length : 1);
+            return `
+              <div class="phone-order-card" onclick="window.selectPhoneOrder(${idx})" style="background:var(--pz-white); border:1.5px solid var(--pz-light); border-radius:var(--radius); padding:16px; cursor:pointer; transition:var(--transition); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:var(--shadow-sm);">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="color:var(--pz-onyx); font-family:'Montserrat',sans-serif; font-size:1.05rem;">#${o.orderNumber || 'CMD'}</strong>
+                    <span style="font-size:0.75rem; color:var(--pz-grey);">${dateStr}</span>
+                  </div>
+                  <div style="font-size:0.85rem; color:var(--pz-grey); margin-top:4px;">
+                    <i class="fa-solid fa-location-dot" style="color:var(--pz-gold-dark);"></i> ${o.orderType === 'domicile' ? 'À Domicile' : 'Stop Desk'} (${o.wilaya || '—'}) • ${itemsCount} article${itemsCount > 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-weight:900; color:var(--pz-gold-dark); font-family:'Montserrat',sans-serif; font-size:1.1rem;">
+                    ${(o.grandTotal || 0).toFixed(2)} DA
+                  </div>
+                  <span class="status-badge" style="font-size:0.75rem; margin-top:4px; display:inline-block;">
+                    ${getStatusText(o.status)}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function getStatusText(status) {
+      switch (status) {
+        case 'pending': return '⏳ En Attente';
+        case 'accepted': case 'confirmed': return '✓ Validée';
+        case 'shipped': return '🚚 En Livraison';
+        case 'arrived': case 'delivered': return '📦 Livrée';
+        case 'cancelled': case 'returned': return '✕ Annulée';
+        default: return status || 'En cours';
+      }
+    }
+
+    window.selectPhoneOrder = function(index) {
+      if (!currentFoundOrders || !currentFoundOrders[index]) return;
+      const order = currentFoundOrders[index];
+
+      const listContainer = document.getElementById('phoneOrdersList');
+      const backBtnContainer = document.getElementById('backToListBtnContainer');
+      if (listContainer) listContainer.style.display = 'none';
+      if (backBtnContainer) backBtnContainer.style.display = 'block';
+
+      displayTracking(order);
+    };
+
+    const backBtn = document.getElementById('backToListBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        const listContainer = document.getElementById('phoneOrdersList');
+        const result = document.getElementById('trackingResult');
+        const backBtnContainer = document.getElementById('backToListBtnContainer');
+        if (result) result.style.display = 'none';
+        if (backBtnContainer) backBtnContainer.style.display = 'none';
+        if (listContainer) listContainer.style.display = 'block';
+      });
+    }
 
     function showError(message) {
       const errorMsg = document.getElementById('errorMessage');
       errorMsg.querySelector('span').textContent = message;
       errorMsg.classList.add('show');
       document.getElementById('trackingResult').style.display = 'none';
+      const listContainer = document.getElementById('phoneOrdersList');
+      if (listContainer) listContainer.style.display = 'none';
     }
 
     function displayTracking(order) {
@@ -1116,10 +1263,10 @@
       result.style.display = 'block';
 
       document.getElementById('info-orderNumber').textContent = '#' + order.orderNumber;
-      document.getElementById('info-date').textContent = new Date(order.date).toLocaleDateString('fr-FR', {
+      document.getElementById('info-date').textContent = order.date ? new Date(order.date).toLocaleDateString('fr-FR', {
         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-      });
-      document.getElementById('info-client').textContent = `${order.firstName || ''} ${order.lastName || ''}`.trim();
+      }) : '—';
+      document.getElementById('info-client').textContent = `${order.firstName || ''} ${order.lastName || ''}`.trim() || 'Client';
       
       const phoneLink = document.getElementById('info-phone');
       phoneLink.textContent = order.phone1 || '—';
@@ -1131,8 +1278,53 @@
       
       document.getElementById('info-total').textContent = (order.grandTotal || 0).toFixed(2) + ' DA';
 
+      // Afficher les articles achetés s'ils existent
+      const items = Array.isArray(order.cartItems) ? order.cartItems : (Array.isArray(order.products) ? order.products : []);
+      let itemsContainer = document.getElementById('trackingCartItemsRow');
+      if (!itemsContainer) {
+        const orderInfoBox = document.querySelector('.order-info');
+        if (orderInfoBox) {
+          itemsContainer = document.createElement('div');
+          itemsContainer.id = 'trackingCartItemsRow';
+          itemsContainer.className = 'info-row';
+          itemsContainer.style.flexDirection = 'column';
+          itemsContainer.style.alignItems = 'flex-start';
+          itemsContainer.style.gap = '8px';
+          itemsContainer.style.marginTop = '10px';
+          orderInfoBox.appendChild(itemsContainer);
+        }
+      }
+
+      if (itemsContainer) {
+        if (items.length > 0) {
+          itemsContainer.innerHTML = `
+            <span class="info-label" style="font-weight:700; color:var(--pz-onyx);">Articles commandés (${items.length}) :</span>
+            <div style="width:100%; background:var(--pz-cream); border-radius:6px; padding:10px 14px; font-size:0.85rem;">
+              ${items.map(it => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px dashed var(--pz-light);">
+                  <div>
+                    <strong>${it.name || 'Produit'}</strong>
+                    ${it.flavor ? `<span style="font-size:0.75rem; color:var(--pz-grey); margin-left:4px;">(${it.flavor})</span>` : ''}
+                    <span style="font-size:0.75rem; color:var(--pz-grey); margin-left:6px;">× ${it.quantity || 1}</span>
+                  </div>
+                  <div style="font-weight:700; color:var(--pz-dark);">
+                    ${(Number(it.total || (it.price * it.quantity)) || 0).toFixed(2)} DA
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          itemsContainer.style.display = 'flex';
+        } else {
+          itemsContainer.style.display = 'none';
+        }
+      }
+
       updateTimeline(order.status || 'pending');
       showDriverInfo(order);
+
+      // Scroll smoothly to tracking result
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function updateTimeline(currentStatus) {
@@ -1197,8 +1389,19 @@
       });
     };
 
+    // Auto-search via URL parameter (?order=... ou ?phone=...)
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('orderNumber')?.focus();
+      const params = new URLSearchParams(window.location.search);
+      const queryParam = params.get('order') || params.get('phone');
+      if (queryParam) {
+        const input = document.getElementById('orderNumber');
+        if (input) {
+          input.value = queryParam;
+          executeTrackingSearch(queryParam);
+        }
+      } else {
+        document.getElementById('orderNumber')?.focus();
+      }
     });
   </script>
 </body>

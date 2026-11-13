@@ -1337,6 +1337,16 @@
                                         <option value="stopdesk">Stop Desk (Point relais)</option>
                                     </select>
                                 </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">QUANTITÉ * <span style="font-size:0.75rem; color:var(--pz-gold-dark); font-weight:700;">(Stock : ${pQty} disponible${pQty > 1 ? 's' : ''})</span></label>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <button type="button" id="quickQtyMinus" style="width:42px; height:42px; border:1.5px solid var(--pz-slate); background:var(--pz-graphite); color:var(--pz-white); border-radius:var(--radius); font-size:1.2rem; cursor:pointer; font-weight:800;">-</button>
+                                        <input type="number" class="form-control" id="quickQuantity" value="1" min="1" max="${pQty}" required style="text-align:center; font-weight:900; font-size:1.1rem; width:80px; font-family:'Montserrat',sans-serif;">
+                                        <button type="button" id="quickQtyPlus" style="width:42px; height:42px; border:1.5px solid var(--pz-slate); background:var(--pz-graphite); color:var(--pz-white); border-radius:var(--radius); font-size:1.2rem; cursor:pointer; font-weight:800;">+</button>
+                                        <span id="quickUnitInfo" style="font-size:0.85rem; color:var(--pz-grey); font-weight:600; margin-left:6px;"></span>
+                                    </div>
+                                </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
@@ -1476,7 +1486,7 @@
                     }
 
                     if (pQty > 0) {
-                        initQuickOrderForm(pPrice);
+                        initQuickOrderForm(effectiveProductPrice, pQty);
                     }
                 } else {
                     container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 100px 0;">
@@ -1493,14 +1503,53 @@
             }
         });
 
-        function initQuickOrderForm(productPrice) {
+        function initQuickOrderForm(productPrice, maxStock) {
             const form = document.getElementById('quickOrderForm');
             const orderType = document.getElementById('quickOrderType');
             const wilaya = document.getElementById('quickWilaya');
             const commune = document.getElementById('quickCommune');
-            const shippingInfo = document.getElementById('quickShippingInfo');
+            const qtyInput = document.getElementById('quickQuantity');
+            const qtyMinus = document.getElementById('quickQtyMinus');
+            const qtyPlus = document.getElementById('quickQtyPlus');
+            const unitInfo = document.getElementById('quickUnitInfo');
             
             loadWilayas(wilaya, commune);
+
+            function updateQtyDisplay() {
+                let q = parseInt(qtyInput.value) || 1;
+                if (q < 1) q = 1;
+                if (q > maxStock) q = maxStock;
+                qtyInput.value = q;
+                if (unitInfo) {
+                    unitInfo.textContent = q > 1 ? `(${q} × ${productPrice.toFixed(2)} DA)` : '';
+                }
+                calculateQuickShipping(productPrice);
+            }
+
+            if (qtyMinus) {
+                qtyMinus.addEventListener('click', () => {
+                    let q = parseInt(qtyInput.value) || 1;
+                    if (q > 1) {
+                        qtyInput.value = q - 1;
+                        updateQtyDisplay();
+                    }
+                });
+            }
+
+            if (qtyPlus) {
+                qtyPlus.addEventListener('click', () => {
+                    let q = parseInt(qtyInput.value) || 1;
+                    if (q < maxStock) {
+                        qtyInput.value = q + 1;
+                        updateQtyDisplay();
+                    }
+                });
+            }
+
+            if (qtyInput) {
+                qtyInput.addEventListener('change', updateQtyDisplay);
+                qtyInput.addEventListener('input', updateQtyDisplay);
+            }
             
             orderType.addEventListener('change', () => {
                 calculateQuickShipping(productPrice);
@@ -1526,14 +1575,18 @@
             const wilaya = document.getElementById('quickWilaya').value;
             const commune = document.getElementById('quickCommune').value;
             const shippingInfo = document.getElementById('quickShippingInfo');
+            const qty = parseInt(document.getElementById('quickQuantity')?.value) || 1;
             
+            const productTotal = productPrice * qty;
+            document.getElementById('quickProductPrice').textContent = productTotal.toLocaleString('fr-FR') + ' DA';
+
             if (!orderType || !wilaya || !commune) {
                 shippingInfo.classList.remove('active');
                 return;
             }
             
             const shippingPrice = getShippingPrice(wilaya, orderType);
-            const grandTotal = productPrice + shippingPrice;
+            const grandTotal = productTotal + shippingPrice;
             
             document.getElementById('quickShippingPrice').textContent = shippingPrice.toLocaleString('fr-FR') + ' DA';
             document.getElementById('quickGrandTotal').textContent = grandTotal.toLocaleString('fr-FR') + ' DA';
@@ -1556,6 +1609,7 @@
                 const phone2 = document.getElementById('quickPhone2').value;
                 const wilayaCode = document.getElementById('quickWilaya').value;
                 const commune = document.getElementById('quickCommune').value;
+                const qty = parseInt(document.getElementById('quickQuantity')?.value) || 1;
                 
                 const wilayaKey = getWilayaKey(wilayaCode);
                 const wilayaName = wilayaKey ? wilayaKey.split(' - ')[1] : wilayaCode;
@@ -1572,7 +1626,7 @@
                 const priceCheck = await validateOrderPrices([{
                     id: currentProductId,
                     name: currentProduct.name,
-                    quantity: 1,
+                    quantity: qty,
                     flavor: selectedFlavor || ''
                 }], currentUser);
 
@@ -1601,7 +1655,7 @@
                         price: validatedItem.unitPrice,
                         regularPrice: validatedItem.regularPrice,
                         isWholesale: validatedItem.isWholesale,
-                        quantity: 1,
+                        quantity: qty,
                         flavor: selectedFlavor || ''
                     }],
                     cartItems: [{
@@ -1610,7 +1664,7 @@
                         price: validatedItem.unitPrice,
                         regularPrice: validatedItem.regularPrice,
                         isWholesale: validatedItem.isWholesale,
-                        quantity: 1,
+                        quantity: qty,
                         flavor: selectedFlavor || ''
                     }],
                     subtotal: validatedSubtotal,
@@ -1630,12 +1684,12 @@
                     const freshDoc = await getDoc(productRef);
                     if (freshDoc.exists()) {
                         const curQty = parseInt(freshDoc.data().quantity) || 0;
-                        const newQty = Math.max(0, curQty - 1);
+                        const newQty = Math.max(0, curQty - qty);
                         await updateDoc(productRef, {
                             quantity: newQty,
                             updatedAt: new Date().toISOString()
                         });
-                        console.log(`✅ Stock produit ${currentProductId} décrémenté : ${curQty} -> ${newQty}`);
+                        console.log(`✅ Stock produit ${currentProductId} décrémenté : ${curQty} -> ${newQty} (-${qty})`);
                     }
                 } catch (stockErr) {
                     console.error("Erreur mise à jour stock produit:", stockErr);
