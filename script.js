@@ -7,6 +7,9 @@ import { db } from './firebase-config.js';
 import { 
   getCurrentUser, isApprovedReseller, isPendingReseller, validateOrderPrices, refreshUserSession 
 } from './auth-service.js';
+import { 
+  fetchLiveShippingRates, getShippingRate 
+} from './shipping-service.js';
 
 // ========== VARIABLES GLOBALES ==========
 let products = [];
@@ -61,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Refresh session from Firestore to catch any recent admin approvals/suspensions
   await refreshUserSession();
   updateHeaderAuthUI();
+
+  // Charger les tarifs de livraison personnalisés depuis Firestore
+  await fetchLiveShippingRates(db);
 
   loadProductsFromFirebase();
   setupEventListeners();
@@ -690,8 +696,8 @@ function populateShippingTable() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${wilaya}</td>
-      <td class="price-tag">${shippingPrices[wilaya]} DA</td>
-      <td class="price-tag">${stopDeskPrices[wilaya]} DA</td>
+      <td class="price-tag">${getShippingRate(wilaya, 'domicile')} DA</td>
+      <td class="price-tag">${getShippingRate(wilaya, 'stopdesk')} DA</td>
     `;
     tableBody.appendChild(row);
   });
@@ -768,9 +774,7 @@ function updateShippingPrice() {
 
   if (!type || !wilaya || !priceEl) return;
 
-  let price = 0;
-  if (type === 'domicile') price = shippingPrices[wilaya] || 0;
-  else if (type === 'stopdesk') price = stopDeskPrices[wilaya] || 0;
+  const price = getShippingRate(wilaya, type);
 
   priceEl.textContent = price + ' DA';
   if (info) info.classList.add('active');
@@ -917,9 +921,7 @@ async function submitOrderForm() {
     console.log("🛡️ Validation des prix serveur avec le rôle utilisateur...");
     const priceValidation = await validateOrderPrices(cart, currentUser);
 
-    let shippingPrice = 0;
-    if (orderType === 'domicile') shippingPrice = shippingPrices[wilaya] || 0;
-    else if (orderType === 'stopdesk') shippingPrice = stopDeskPrices[wilaya] || 0;
+    const shippingPrice = getShippingRate(wilaya, orderType);
 
     const validatedCartTotal = priceValidation.cartTotal;
     const validatedGrandTotal = validatedCartTotal + shippingPrice;

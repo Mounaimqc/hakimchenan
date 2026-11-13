@@ -257,6 +257,7 @@
       <li class="nav-item"><a href="#commandes" id="navLinkCommandes" class="nav-link active" onclick="switchAdminTab('commandes'); return false;"><i class="fa-solid fa-cart-shopping"></i> Commandes</a></li>
       <li class="nav-item"><a href="#revendeurs" id="navLinkResellers" class="nav-link" onclick="switchAdminTab('resellers'); return false;"><i class="fa-solid fa-handshake"></i> Revendeurs <span id="pendingResellersBadge" style="display:none; background:var(--danger); color:#fff; font-size:0.7rem; font-weight:700; padding:2px 7px; border-radius:10px; margin-left:auto;">0</span></a></li>
       <li class="nav-item"><a href="#clients" id="navLinkCustomers" class="nav-link" onclick="switchAdminTab('customers'); return false;"><i class="fa-solid fa-users"></i> Clients</a></li>
+      <li class="nav-item"><a href="#livraison" id="navLinkShipping" class="nav-link" onclick="switchAdminTab('shipping'); return false;"><i class="fa-solid fa-truck-fast"></i> Tarifs Livraison</a></li>
       <li class="nav-item"><a href="#audit" id="navLinkAudit" class="nav-link" onclick="switchAdminTab('audit'); return false;"><i class="fa-solid fa-shield-halved"></i> Audit & Système</a></li>
       <li class="nav-item"><a href="gerer-produits.html" class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Produits</a></li>
       <li class="nav-item"><a href="index.html" class="nav-link" target="_blank"><i class="fa-solid fa-store"></i> Voir le site</a></li>
@@ -555,7 +556,59 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 4: AUDIT & SYSTÈME                 -->
+    <!-- SECTION 4: TARIFS DE LIVRAISON (WILAYAS)   -->
+    <!-- ========================================== -->
+    <div id="sectionShipping" class="admin-tab-section" style="display:none;">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h3 style="font-size:1.15rem; font-family:'Montserrat',sans-serif; margin-bottom:4px; color:var(--text);"><i class="fa-solid fa-truck-ramp-box" style="color:var(--primary);"></i> Configuration des Frais de Livraison par Wilaya</h3>
+          <p style="font-size:0.85rem; color:var(--text-light); margin:0;">Modifiez directement les prix de livraison à domicile et en point relais (Stop Desk) pour chacune des 58 wilayas d'Algérie.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="resetDefaultShippingPrices()">
+            <i class="fa-solid fa-rotate-left"></i> Rétablir Tarifs par Défaut
+          </button>
+          <button class="btn btn-primary" id="saveAllShippingBtn" onclick="saveAllShippingPrices()">
+            <i class="fa-solid fa-floppy-disk"></i> Enregistrer Tous les Tarifs
+          </button>
+        </div>
+      </div>
+
+      <div class="actions-bar" style="margin-bottom: 20px;">
+        <div class="filters" style="width:100%; max-width:400px;">
+          <div class="input-group" style="width:100%;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchWilayaShippingInput" placeholder="Rechercher wilaya (ex: Alger, Oran, 16)..." oninput="filterShippingWilayas()">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 90px;">Code</th>
+                <th>Nom de la Wilaya</th>
+                <th style="width: 220px;">Prix Domicile (DA)</th>
+                <th style="width: 220px;">Prix Stop Desk (DA)</th>
+                <th style="width: 140px; text-align:center;">Action Rapide</th>
+              </tr>
+            </thead>
+            <tbody id="shippingTableBody">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:var(--text-light);">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i> Chargement des tarifs de livraison...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5: AUDIT & SYSTÈME                 -->
     <!-- ========================================== -->
     <div id="sectionAudit" class="admin-tab-section" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); padding:20px; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:20px; flex-wrap:wrap; gap:16px;">

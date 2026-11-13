@@ -1227,6 +1227,12 @@
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { db } from './firebase-config.js';
         import { isApprovedReseller, getCurrentUser, validateOrderPrices } from './auth-service.js';
+        import { fetchLiveShippingRates, getShippingRate } from './shipping-service.js';
+
+        // Override getShippingPrice with live dynamic rates
+        window.getShippingPrice = function(wilayaCode, orderType) {
+            return getShippingRate(wilayaCode, orderType);
+        };
 
         function sanitizeImageUrl(url) {
             if (!url || typeof url !== 'string') return '';
@@ -1255,6 +1261,9 @@
         let effectiveProductPrice = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Charger les tarifs de livraison personnalisés depuis Firestore
+            await fetchLiveShippingRates(db);
+
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('id');
             const container = document.getElementById('single-product-container');

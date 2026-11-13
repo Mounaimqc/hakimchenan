@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Hero Video Generator - HAKIM CHENAN NUTRITION</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0A0A0F;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0 0 5px 0;
+      color: #FFB800;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+    .header p {
+      margin: 0;
+      color: #8E92A4;
+      font-size: 14px;
+    }
+    .canvas-container {
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255,184,0,0.15);
+      border: 2px solid #232738;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+      width: 960px;
+      height: 540px;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .btn {
+      background: linear-gradient(135deg, #FFB800 0%, #FF9500 100%);
+      color: #0A0A0F;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 184, 0, 0.3);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 184, 0, 0.45);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #status {
+      font-size: 14px;
+      color: #FFB800;
+      font-weight: 600;
+    }
+    .preview-video {
+      margin-top: 20px;
+      display: none;
+      border-radius: 12px;
+      border: 2px solid #28A745;
+      width: 480px;
+      height: 270px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>HAKIM CHENAN NUTRITION — GÉNÉRATEUR VIDÉO HERO</h1>
+    <p>Génération de vidéo cinématique en boucle (12 secondes) avec les 4 produits officiels</p>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="c" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="recordBtn" disabled>
+      🎥 Enregistrer & Télécharger la Vidéo (WebM / MP4)
+    </button>
+    <div id="status">Chargement des 4 produits...</div>
+  </div>
+
+  <video id="previewVid" class="preview-video" controls autoplay loop muted></video>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const status = document.getElementById('status');
+    const recordBtn = document.getElementById('recordBtn');
+    const previewVid = document.getElementById('previewVid');
+
+    const products = [
+      {
+        src: 'images/products/nitrotech-ripped.webp',
+        brand: 'MUSCLETECH',
+        name: 'NITRO-TECH RIPPED',
+        tagline: 'PROTÉINE ISOLATE & SÈCHE MUSCULAIRE',
+        stat: '30g PROTÉINES • 820mg FORMULE MINCEUR',
+        color: '#FF7A00',
+        glow: 'rgba(255, 122, 0, 0.5)'
+      },
+      {
+        src: 'images/products/biotech-creatine.webp',
+        brand: 'BIOTECHUSA',
+        name: '100% CREATINE MONOHYDRATE',
+        tagline: 'FORCE PURE & PUISSANCE EXPLOSIVE',
+        stat: '100% PURE MICRONISÉE • 88 DOSES',
+        color: '#A6E22E',
+        glow: 'rgba(166, 226, 46, 0.45)'
+      },
+      {
+        src: 'images/products/xtend-bcaa.webp',
+        brand: 'XTEND',
+        name: 'THE ORIGINAL 7G BCAA',
+        tagline: 'RÉCUPÉRATION & HYDRATATION SPORTIVE',
+        stat: '7G BCAA 2:1:1 • 0 SUCRE • ÉLECTROLYTES',
+        color: '#00D2FF',
+        glow: 'rgba(0, 210, 255, 0.5)'
+      },
+      {
+        src: 'images/products/scitec-jumbo.webp',
+        brand: 'SCITEC NUTRITION',
+        name: 'JUMBO PROFESSIONAL',
+        tagline: 'PRISE DE MASSE MUSCULAIRE EXTRÊME',
+        stat: 'COMPLEXE PRO MASSE • GLUCIDES & CRÉATINE',
+        color: '#89E300',
+        glow: 'rgba(137, 227, 0, 0.45)'
+      }
+    ];
+
+    let loadedImages = 0;
+    products.forEach(p => {
+      p.img = new Image();
+      p.img.onload = () => {
+        loadedImages++;
+        if (loadedImages === products.length) {
+          status.innerText = '✅ Produits prêts. Animation en cours...';
+          recordBtn.disabled = false;
+          startAnimation();
+
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('autorecord') === '1') {
+            setTimeout(() => {
+              recordAndPost(12000);
+            }, 500);
+          }
+        }
+      };
+      p.img.src = p.src;
+    });
+
+    // Floating particles
+    const particles = [];
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * 1280,
+        y: Math.random() * 720,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: -0.6 - Math.random() * 1.4,
+        size: 1.5 + Math.random() * 3,
+        alpha: 0.2 + Math.random() * 0.7
+      });
+    }
+
+    const DURATION = 12000;
+    const PROD_DUR = 3000;
+
+    function drawFrame(t) {
+      const prodIndex = Math.floor((t % DURATION) / PROD_DUR);
+      const prodTime = (t % PROD_DUR) / PROD_DUR;
+      const p = products[prodIndex];
+
+      // 1. Dark Gym Background
+      ctx.fillStyle = '#08090D';
+      ctx.fillRect(0, 0, 1280, 720);
+
+      // Subtle gym floor lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < 1280; x += 80) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 720);
+        ctx.stroke();
+      }
+
+      // 2. Dynamic Ambient Glow
+      const bgGrad = ctx.createRadialGradient(640, 360, 50, 640, 360, 550);
+      bgGrad.addColorStop(0, p.glow);
+      bgGrad.addColorStop(0.55, 'rgba(15, 18, 25, 0.65)');
+      bgGrad.addColorStop(1, '#08090D');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1280, 720);
+
+      // 3. Floating Gym Sparks
+      particles.forEach(pt => {
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        if (pt.y < -10) pt.y = 730;
+        if (pt.x < -10) pt.x = 1290;
+        if (pt.x > 1290) pt.x = -10;
+
+        ctx.fillStyle = `rgba(255, 184, 0, ${pt.alpha})`;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Ground Pedestal & Glow
+      const pedGrad = ctx.createRadialGradient(640, 560, 10, 640, 560, 260);
+      pedGrad.addColorStop(0, p.color);
+      pedGrad.addColorStop(0.35, 'rgba(255, 184, 0, 0.25)');
+      pedGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = pedGrad;
+      ctx.beginPath();
+      ctx.ellipse(640, 560, 260, 40, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5. Product Float & Transition
+      let alpha = 1;
+      let scale = 1;
+      const yOffset = Math.sin(t * 0.003) * 14;
+
+      if (prodTime < 0.15) {
+        const ease = prodTime / 0.15;
+        alpha = ease;
+        scale = 0.88 + 0.12 * ease;
+      } else if (prodTime > 0.85) {
+        const ease = (1 - prodTime) / 0.15;
+        alpha = ease;
+        scale = 1 + 0.08 * (1 - ease);
+      }
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.translate(640, 360 + yOffset);
+      ctx.scale(scale, scale);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(0, 185 - yOffset * 0.5, 130, 24, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Product bottle
+      if (p.img && p.img.complete) {
+        const h = 410;
+        const aspect = p.img.naturalWidth / p.img.naturalHeight || 1;
+        const w = h * aspect;
+        ctx.drawImage(p.img, -w / 2, -h / 2, w, h);
+      }
+      ctx.restore();
+
+      // 6. Branding & Nutritional Callout
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.textAlign = 'center';
+
+      // Brand badge
+      ctx.font = 'bold 16px "Montserrat", sans-serif';
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.brand + ' • SÉLECTION OFFICIELLE', 640, 85);
+
+      // Name
+      ctx.font = '900 36px "Montserrat", sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 18;
+      ctx.fillText(p.name, 640, 130);
+
+      // Tagline
+      ctx.font = '600 17px "Montserrat", sans-serif';
+      ctx.fillStyle = '#D6D9E0';
+      ctx.fillText(p.tagline, 640, 162);
+
+      // Bottom stat
+      ctx.font = 'bold 16px "Montserrat", sans-serif';
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.stat, 640, 665);
+
+      ctx.restore();
+
+      // Corner watermark
+      ctx.font = '900 18px "Montserrat", sans-serif';
+      ctx.fillStyle = 'rgba(255, 184, 0, 0.85)';
+      ctx.textAlign = 'left';
+      ctx.fillText('⚡ HAKIM CHENAN', 40, 48);
+      ctx.font = '600 12px "Montserrat", sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText('NUTRITION & GYM — QUALITÉ 100% CERTIFIÉE', 40, 68);
+    }
+
+    function startAnimation() {
+      function loop(timestamp) {
+        drawFrame(timestamp);
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    async function recordAndPost(durationMs = 12000) {
+      status.innerText = '🔴 Enregistrement de la vidéo (12s)...';
+      const stream = canvas.captureStream(30);
+
+      let options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+
+      const recorder = new MediaRecorder(stream, options);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: options.mimeType });
+        status.innerText = `✅ Vidéo générée (${(blob.size / 1024).toFixed(0)} KB). Envoi au serveur...`;
+
+        // POST to backend
+        try {
+          const res = await fetch('/save-video', {
+            method: 'POST',
+            body: blob
+          });
+          const json = await res.json();
+          status.innerText = `🎉 Vidéo enregistrée dans images/hero-products.webm (${(json.size / 1024).toFixed(0)} KB) !`;
+        } catch (err) {
+          console.error(err);
+          status.innerText = 'Vidéo prête. Téléchargement direct...';
+          downloadBlob(blob);
+        }
+
+        previewVid.src = URL.createObjectURL(blob);
+        previewVid.style.display = 'block';
+      };
+
+      recorder.start();
+      setTimeout(() => {
+        recorder.stop();
+      }, durationMs);
+    }
+
+    function downloadBlob(blob) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'hero-products.webm';
+      a.click();
+    }
+
+    recordBtn.addEventListener('click', () => {
+      recordBtn.disabled = true;
+      recordAndPost(12000);
+    });
+  </script>
+</body>
+</html>

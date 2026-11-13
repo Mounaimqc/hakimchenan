@@ -7,6 +7,10 @@ import {
 import { db } from './firebase-config.js';
 import { logAdminAction } from './auth-service.js';
 import { backupDatabase, migrateProductsSchema } from './migration-init.js';
+import { 
+  fetchLiveShippingRates, saveShippingRatesToFirestore, DEFAULT_SHIPPING_PRICES, DEFAULT_STOPDESK_PRICES,
+  activeShippingPrices, activeStopDeskPrices
+} from './shipping-service.js';
 
 // Global state
 let allCommandes = [];
@@ -48,6 +52,7 @@ export function switchAdminTab(tab) {
     commandes: document.getElementById('sectionCommandes'),
     resellers: document.getElementById('sectionResellers'),
     customers: document.getElementById('sectionCustomers'),
+    shipping: document.getElementById('sectionShipping'),
     audit: document.getElementById('sectionAudit')
   };
 
@@ -55,6 +60,7 @@ export function switchAdminTab(tab) {
     commandes: document.getElementById('navLinkCommandes'),
     resellers: document.getElementById('navLinkResellers'),
     customers: document.getElementById('navLinkCustomers'),
+    shipping: document.getElementById('navLinkShipping'),
     audit: document.getElementById('navLinkAudit')
   };
 
@@ -62,6 +68,7 @@ export function switchAdminTab(tab) {
     commandes: { title: "📊 Tableau de bord Commandes", sub: "Gérez vos commandes en temps réel" },
     resellers: { title: "🤝 Gestion des Revendeurs", sub: "Candidatures, approbations et tarifs de gros" },
     customers: { title: "👥 Gestion des Clients", sub: "Tous les comptes clients et revendeurs" },
+    shipping: { title: "🚚 Tarifs de Livraison", sub: "Modifiez les prix de livraison domicile et stop desk par wilaya" },
     audit: { title: "🛡️ Audit & Système", sub: "Journal d'audit de sécurité et maintenance de la base" }
   };
 
@@ -86,6 +93,7 @@ export function switchAdminTab(tab) {
   if (tab === 'commandes' && allCommandes.length === 0) loadCommandes();
   if (tab === 'resellers') loadResellers();
   if (tab === 'customers') loadCustomers();
+  if (tab === 'shipping') loadShippingAdmin();
   if (tab === 'audit') loadAuditLogs();
 }
 window.switchAdminTab = switchAdminTab;
@@ -1270,17 +1278,174 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial tab from URL hash if present
   const hash = window.location.hash.replace('#', '');
-  if (hash && ['commandes', 'resellers', 'customers', 'audit'].includes(hash)) {
+  if (hash && ['commandes', 'resellers', 'customers', 'shipping', 'audit'].includes(hash)) {
     switchAdminTab(hash);
   }
 
   window.addEventListener('hashchange', () => {
     const newHash = window.location.hash.replace('#', '');
-    if (newHash && ['commandes', 'resellers', 'customers', 'audit'].includes(newHash)) {
+    if (newHash && ['commandes', 'resellers', 'customers', 'shipping', 'audit'].includes(newHash)) {
       switchAdminTab(newHash);
     }
   });
 });
+
+// ==========================================
+// 🚚 GESTION DES TARIFS DE LIVRAISON PAR WILAYA
+// ==========================================
+
+let currentDomicileRates = {};
+let currentStopDeskRates = {};
+
+export async function loadShippingAdmin() {
+  const tbody = document.getElementById('shippingTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-light);"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement des tarifs de livraison...</td></tr>`;
+
+  try {
+    const rates = await fetchLiveShippingRates(db);
+    currentDomicileRates = { ...rates.domicile };
+    currentStopDeskRates = { ...rates.stopdesk };
+
+    renderShippingTable(Object.keys(DEFAULT_SHIPPING_PRICES));
+  } catch (err) {
+    console.error("Erreur chargement tarifs livraison:", err);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--danger);">Erreur de chargement des tarifs</td></tr>`;
+  }
+}
+window.loadShippingAdmin = loadShippingAdmin;
+
+export function renderShippingTable(wilayasList) {
+  const tbody = document.getElementById('shippingTableBody');
+  if (!tbody) return;
+
+  if (wilayasList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-light);">Aucune wilaya trouvée pour cette recherche</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = wilayasList.map(key => {
+    const code = key.split(' - ')[0] || '';
+    const name = key.split(' - ')[1] || key;
+    const domPrice = currentDomicileRates[key] !== undefined ? currentDomicileRates[key] : (DEFAULT_SHIPPING_PRICES[key] || 0);
+    const stopPrice = currentStopDeskRates[key] !== undefined ? currentStopDeskRates[key] : (DEFAULT_STOPDESK_PRICES[key] || 0);
+    const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
+
+    return `
+      <tr>
+        <td style="font-weight:700; color:var(--primary); font-size:1rem;">${code}</td>
+        <td style="font-weight:600; font-size:0.95rem;">${name}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="number" id="rate_dom_${safeKey}" value="${domPrice}" min="0" step="50" class="form-control" style="width:130px; padding:8px 12px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:var(--radius); font-weight:700;">
+            <span style="color:var(--text-light); font-size:0.85rem;">DA</span>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="number" id="rate_stop_${safeKey}" value="${stopPrice}" min="0" step="50" class="form-control" style="width:130px; padding:8px 12px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:var(--radius); font-weight:700;">
+            <span style="color:var(--text-light); font-size:0.85rem;">DA</span>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <button class="btn btn-outline" style="padding:6px 12px; font-size:0.8rem;" onclick="saveSingleWilayaRate('${key}', '${safeKey}')">
+            <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+window.renderShippingTable = renderShippingTable;
+
+export function filterShippingWilayas() {
+  const queryStr = document.getElementById('searchWilayaShippingInput')?.value.trim().toLowerCase() || '';
+  const allKeys = Object.keys(DEFAULT_SHIPPING_PRICES);
+
+  if (!queryStr) {
+    renderShippingTable(allKeys);
+    return;
+  }
+
+  const filtered = allKeys.filter(k => k.toLowerCase().includes(queryStr));
+  renderShippingTable(filtered);
+}
+window.filterShippingWilayas = filterShippingWilayas;
+
+export async function saveSingleWilayaRate(wilayaKey, safeKey) {
+  const domInput = document.getElementById(`rate_dom_${safeKey}`);
+  const stopInput = document.getElementById(`rate_stop_${safeKey}`);
+  if (!domInput || !stopInput) return;
+
+  const domVal = parseFloat(domInput.value) || 0;
+  const stopVal = parseFloat(stopInput.value) || 0;
+
+  currentDomicileRates[wilayaKey] = domVal;
+  currentStopDeskRates[wilayaKey] = stopVal;
+
+  try {
+    await saveShippingRatesToFirestore(db, currentDomicileRates, currentStopDeskRates);
+    await logAdminAction("UPDATE_SHIPPING_RATE_WILAYA", "parametres", "livraison", { wilaya: wilayaKey, domicile: domVal, stopdesk: stopVal });
+    showNotification(`✅ Tarifs enregistrés pour ${wilayaKey} : Domicile ${domVal} DA / Stop Desk ${stopVal} DA`, 'success');
+  } catch (err) {
+    console.error(err);
+    showNotification(`❌ Erreur: ${err.message}`, 'error');
+  }
+}
+window.saveSingleWilayaRate = saveSingleWilayaRate;
+
+export async function saveAllShippingPrices() {
+  const saveBtn = document.getElementById('saveAllShippingBtn');
+  const originalHTML = saveBtn ? saveBtn.innerHTML : '';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enregistrement en cours...';
+  }
+
+  try {
+    const allKeys = Object.keys(DEFAULT_SHIPPING_PRICES);
+    for (const key of allKeys) {
+      const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
+      const domInput = document.getElementById(`rate_dom_${safeKey}`);
+      const stopInput = document.getElementById(`rate_stop_${safeKey}`);
+      if (domInput) currentDomicileRates[key] = parseFloat(domInput.value) || 0;
+      if (stopInput) currentStopDeskRates[key] = parseFloat(stopInput.value) || 0;
+    }
+
+    await saveShippingRatesToFirestore(db, currentDomicileRates, currentStopDeskRates);
+    await logAdminAction("UPDATE_ALL_SHIPPING_RATES", "parametres", "livraison", { count: allKeys.length });
+
+    showNotification('🎉 Tous les tarifs de livraison des 58 wilayas ont été enregistrés avec succès !', 'success');
+  } catch (err) {
+    console.error(err);
+    showNotification(`❌ Erreur lors de l'enregistrement: ${err.message}`, 'error');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalHTML;
+    }
+  }
+}
+window.saveAllShippingPrices = saveAllShippingPrices;
+
+export async function resetDefaultShippingPrices() {
+  if (!confirm("Voulez-vous vraiment rétablir les tarifs de livraison par défaut pour les 58 wilayas ?")) return;
+
+  currentDomicileRates = { ...DEFAULT_SHIPPING_PRICES };
+  currentStopDeskRates = { ...DEFAULT_STOPDESK_PRICES };
+
+  try {
+    await saveShippingRatesToFirestore(db, currentDomicileRates, currentStopDeskRates);
+    await logAdminAction("RESET_DEFAULT_SHIPPING_RATES", "parametres", "livraison", {});
+    renderShippingTable(Object.keys(DEFAULT_SHIPPING_PRICES));
+    showNotification('✅ Tarifs de livraison par défaut rétablis avec succès !', 'success');
+  } catch (err) {
+    console.error(err);
+    showNotification(`❌ Erreur: ${err.message}`, 'error');
+  }
+}
+window.resetDefaultShippingPrices = resetDefaultShippingPrices;
 
 // Global exports
 window.showDetail = showDetail;
