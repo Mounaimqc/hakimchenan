@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0A0F">
+    <title>Produit | Power Zone</title>
+    <link rel="icon" href="logo.png" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --pz-onyx: #0A0A0F;
+            --pz-graphite: #1A1D29;
+            --pz-charcoal: #252836;
+            --pz-slate: #3D4152;
+            --pz-gold: #FFB800;
+            --pz-gold-light: #FFD666;
+            --pz-gold-glow: rgba(255, 184, 0, 0.25);
+            --pz-gold-dark: #CC9200;
+            --pz-energy: #FF4D2E;
+            --pz-energy-light: #FF6B4D;
+            --pz-energy-dark: #E63E1F;
+            --pz-energy-glow: rgba(255, 77, 46, 0.3);
+            --pz-white: #FFFFFF;
+            --pz-cream: #FAF9F6;
+            --pz-light: #F3F4F6;
+            --pz-silver: #9CA3AF;
+            --pz-grey: #4B5563;
+            --pz-dark: #1F2937;
+            --pz-success: #10B981;
+            --pz-success-light: rgba(16, 185, 129, 0.15);
+            --pz-danger: #EF4444;
+            --pz-info: #3B82F6;
+            --shadow-sm: 0 2px 8px rgba(10, 10, 15, 0.08);
+            --shadow: 0 10px 30px rgba(10, 10, 15, 0.12);
+            --shadow-lg: 0 20px 50px rgba(10, 10, 15, 0.2);
+            --shadow-gold: 0 15px 40px rgba(255, 184, 0, 0.3);
+            --shadow-energy: 0 10px 30px rgba(255, 77, 46, 0.4);
+            --radius: 8px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --gradient-gold: linear-gradient(135deg, #FFB800 0%, #CC9200 100%);
+            --gradient-energy: linear-gradient(135deg, #FF4D2E 0%, #E63E1F 100%);
+            --gradient-dark: linear-gradient(180deg, #0A0A0F 0%, #1A1D29 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--pz-cream);
+            color: var(--pz-dark);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            color: var(--pz-onyx);
+            letter-spacing: -0.02em;
+        }
+
+        a { text-decoration: none; color: inherit; transition: var(--transition); }
+        button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; outline: none; transition: var(--transition); }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px; margin: 0 auto; padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 16px;
+        }
+
+        .logo { 
+            display: flex; align-items: center; gap: 12px; 
+            font-family: 'Montserrat', sans-serif;
+            flex-shrink: 0;
+        }
+        .logo img { 
+            height: 55px; width: auto; 
+            border-radius: var(--radius);
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(10, 10, 15, 0.15));
+            transition: var(--transition);
+        }
+        .logo:hover img {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 12px rgba(255, 184, 0, 0.3));
+        }
+        .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .brand-name { 
+            font-size: 1.5rem; font-weight: 900; color: var(--pz-onyx); 
+            text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .brand-tagline { 
+            font-size: 0.7rem; font-weight: 800; color: var(--pz-gold); 
+            text-transform: uppercase; letter-spacing: 4px;
+            margin-top: 3px;
+        }
+
+        .header-actions { 
+            display: flex; align-items: center; gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header-btn {
+            display: flex; align-items: center; gap: 8px; 
+            padding: 10px 18px;
+            border-radius: var(--radius); 
+            background: var(--pz-white);
+            color: var(--pz-dark);
+            font-weight: 600; font-size: 0.9rem; 
+            border: 1.5px solid var(--pz-light);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .header-btn:hover { 
+            border-color: var(--pz-gold);
+            color: var(--pz-gold-dark);
+            box-shadow: var(--shadow-sm);
+        }
+        .header-btn i { font-size: 1rem; }
+
+        .cart-btn { 
+            background: var(--gradient-gold); 
+            color: var(--pz-onyx); 
+            border-color: var(--pz-gold);
+            font-weight: 800;
+            position: relative;
+        }
+        .cart-btn:hover { 
+            background: var(--gradient-gold);
+            color: var(--pz-onyx);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .cart-count {
+            position: absolute; top: -8px; right: -8px; 
+            background: var(--pz-energy);
+            color: white; width: 22px; height: 22px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; 
+            border: 2px solid var(--pz-white);
+            box-shadow: var(--shadow-energy);
+        }
+
+        .single-product-container {
+            max-width: 1200px; margin: 60px auto; padding: 0 24px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+            min-height: 60vh; align-items: start;
+        }
+        .product-image-container {
+            background: var(--pz-white); 
+            border-radius: var(--radius-xl);
+            padding: 40px; 
+            display: flex; justify-content: center;
+            align-items: center; 
+            box-shadow: var(--shadow);
+            border: 1px solid var(--pz-light);
+            transition: var(--transition);
+            position: sticky;
+            top: 100px;
+        }
+        .product-image-container:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .product-image-container img { 
+            max-width: 100%; max-height: 500px; object-fit: contain;
+            transition: var(--transition);
+        }
+        .product-image-container:hover img {
+            transform: scale(1.05);
+        }
+        
+        .product-details { padding: 20px 0; }
+        .product-details .category { 
+            color: var(--pz-gold-dark); 
+            font-weight: 800; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--pz-gold-glow);
+            border-radius: 20px;
+        }
+        .product-details h1 { 
+            font-size: 2.8rem; 
+            margin-bottom: 15px; 
+            color: var(--pz-onyx);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+        .product-details .price { 
+            font-size: 2.8rem; 
+            font-weight: 900; 
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px; 
+            font-family: 'Montserrat', sans-serif;
+            display: inline-block;
+        }
+        .product-details .description { 
+            color: var(--pz-grey); 
+            font-size: 1.05rem; 
+            line-height: 1.8; 
+            margin-bottom: 30px; 
+        }
+        
+        .status-badge { 
+            display: inline-flex; 
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+        .in-stock { 
+            background: var(--pz-success-light); 
+            color: var(--pz-success); 
+            border: 1.5px solid var(--pz-success); 
+        }
+        .out-of-stock { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: var(--pz-danger); 
+            border: 1.5px solid var(--pz-danger); 
+        }
+        
+        .add-to-cart-hero {
+            width: 100%; padding: 20px; 
+            background: var(--gradient-energy); 
+            color: var(--pz-white);
+            font-weight: 800; 
+            border: none; 
+            border-radius: var(--radius); 
+            font-size: 1.2rem;
+            cursor: pointer; 
+            transition: var(--transition); 
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            box-shadow: var(--shadow-energy);
+            position: relative;
+            overflow: hidden;
+        }
+        .add-to-cart-hero:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 77, 46, 0.5);
+            filter: brightness(1.1);
+        }
+        .add-to-cart-hero:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        .add-to-cart-hero:disabled {
+            background: var(--pz-light); 
+            color: var(--pz-silver); 
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .quick-order-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: var(--pz-white);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--pz-light);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-order-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--pz-onyx);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-order-title i {
+            color: var(--pz-gold);
+        }
+
+        .quick-order-subtitle {
+            color: var(--pz-grey);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .quick-order-form .form-group {
+            margin-bottom: 18px;
+        }
+
+        .quick-order-form .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--pz-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-order-form .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--pz-cream);
+            border: 2px solid var(--pz-light);
+            border-radius: var(--radius);
+            color: var(--pz-dark);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .quick-order-form .form-control:focus {
+            outline: none;
+            border-color: var(--pz-gold);
+            background: var(--pz-white);
+            box-shadow: 0 0 0 4px var(--pz-gold-glow);
+        }
+
+        .quick-order-form .form-control::placeholder {
+            color: var(--pz-silver);
+        }
+
+        .quick-order-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .quick-order-shipping {
+            background: linear-gradient(135deg, rgba(255, 184, 0, 0.08), rgba(255, 184, 0, 0.15));
+            padding: 18px;
+            border-radius: var(--radius);
+            border: 2px dashed var(--pz-gold);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .quick-order-shipping.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .quick-order-shipping-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--pz-dark);
+            font-size: 0.95rem;
+        }
+
+        .quick-order-shipping-row:last-child {
+            margin-bottom: 0;
+            padding-top: 12px;
+            border-top: 2px solid var(--pz-gold);
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .quick-order-shipping-row span:last-child {
+            color: var(--pz-gold-dark);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .quick-order-submit {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-gold);
+            color: var(--pz-onyx);
+            font-weight: 900;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--shadow-gold);
+            margin-top: 24px;
+        }
+
+        .quick-order-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255, 184, 0, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .quick-order-submit:disabled {
+            background: var(--pz-light);
+            color: var(--pz-silver);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 30px 0;
+            color: var(--pz-silver);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--pz-light);
+        }
+
+        .flavor-selector-btn {
+            padding: 12px 20px;
+            background: var(--pz-white);
+            color: var(--pz-dark);
+            border: 2px solid var(--pz-light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+        .flavor-selector-btn:hover {
+            border-color: var(--pz-gold);
+            color: var(--pz-gold-dark);
+        }
+        .flavor-selector-btn.active {
+            background: var(--gradient-gold);
+            color: var(--pz-onyx);
+            border-color: var(--pz-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.85); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+        .modal {
+            background: var(--pz-white); 
+            width: 100%; max-width: 550px;
+            border-radius: var(--radius-xl); 
+            border: 1px solid var(--pz-light);
+            max-height: 90vh; overflow-y: auto; 
+            box-shadow: var(--shadow-lg); 
+            color: var(--pz-dark);
+        }
+        .modal-header {
+            padding: 24px; 
+            border-bottom: 1px solid var(--pz-light);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--pz-cream);
+        }
+        .modal-title { 
+            font-size: 1.5rem; 
+            color: var(--pz-onyx);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal-title i { color: var(--pz-gold); }
+        .close-modal { 
+            background: none; 
+            color: var(--pz-silver); 
+            font-size: 1.8rem;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .close-modal:hover { 
+            color: var(--pz-onyx);
+            background: var(--pz-light);
+        }
+        .modal-body { padding: 24px; color: var(--pz-dark); }
+        .modal-footer {
+            padding: 24px; 
+            border-top: 1px solid var(--pz-light);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--pz-cream);
+            gap: 12px;
+        }
+        
+        .cart-items { max-height: 350px; overflow-y: auto; padding-right: 10px; }
+        .cart-items::-webkit-scrollbar { width: 6px; }
+        .cart-items::-webkit-scrollbar-thumb { background: var(--pz-gold); border-radius: 4px; }
+        .cart-items::-webkit-scrollbar-track { background: var(--pz-cream); }
+        .cart-item {
+            display: flex; gap: 16px; padding: 16px 0;
+            border-bottom: 1px solid var(--pz-light);
+            align-items: center;
+        }
+        .cart-item-name { font-weight: 700; color: var(--pz-onyx); font-size: 1.1rem; }
+        .cart-item-price { color: var(--pz-gold-dark); font-weight: 600; margin-top: 4px; }
+        .cart-item-quantity { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .quantity-btn { 
+            width: 32px; height: 32px; 
+            background: var(--pz-onyx); color: var(--pz-gold); 
+            border-radius: var(--radius); font-size: 1.2rem; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .quantity-btn:hover { background: var(--gradient-gold); color: var(--pz-onyx); }
+        .remove-btn { 
+            background: transparent; color: var(--pz-danger); 
+            border: 1px solid var(--pz-danger); 
+            padding: 6px 12px; border-radius: var(--radius); 
+            font-size: 0.8rem; font-weight: 600; 
+        }
+        .remove-btn:hover { background: var(--pz-danger); color: white; }
+        .cart-total { 
+            font-size: 1.5rem; 
+            font-family: 'Montserrat', sans-serif; 
+            color: var(--pz-onyx);
+            font-weight: 800;
+        }
+        .cart-empty { 
+            text-align: center; color: var(--pz-silver); 
+            padding: 40px 0; font-size: 1.1rem; 
+        }
+        
+        .btn { 
+            padding: 14px 28px; 
+            border-radius: var(--radius); 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { 
+            background: var(--gradient-gold); 
+            color: var(--pz-onyx); 
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-primary:hover:not(:disabled) { 
+            filter: brightness(1.1);
+            box-shadow: var(--shadow-gold);
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled { 
+            background: var(--pz-light); 
+            color: var(--pz-silver); 
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .btn-outline { 
+            background: transparent; 
+            border: 2px solid var(--pz-onyx); 
+            color: var(--pz-onyx); 
+            font-weight: 700;
+        }
+        .btn-outline:hover { 
+            background: var(--pz-onyx); 
+            color: var(--pz-gold); 
+        }
+        
+        .shipping-info {
+            background: linear-gradient(135deg, rgba(255, 184, 0, 0.08), rgba(255, 184, 0, 0.15)); 
+            padding: 20px;
+            border-radius: var(--radius); 
+            border: 2px dashed var(--pz-gold);
+            margin-top: 20px; 
+            display: none;
+        }
+        .shipping-info.active { display: block; }
+        #shippingPrice, #grandTotal { color: var(--pz-gold-dark); font-weight: 700; }
+        #totalPrice { color: var(--pz-gold-dark); font-weight: 900; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { 
+            display: block; margin-bottom: 8px; font-weight: 700; 
+            font-size: 0.85rem; color: var(--pz-dark); 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-control {
+            width: 100%; padding: 14px; 
+            background: var(--pz-white); 
+            border: 2px solid var(--pz-light);
+            border-radius: var(--radius); 
+            color: var(--pz-dark); font-size: 1rem;
+            transition: var(--transition);
+        }
+        .form-control::placeholder { color: var(--pz-silver); }
+        .form-control:focus { 
+            outline: none; 
+            border-color: var(--pz-gold); 
+            box-shadow: 0 0 0 4px var(--pz-gold-glow); 
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        .footer { 
+            background: var(--pz-onyx); 
+            padding: 80px 24px 30px; 
+            margin-top: 80px; 
+            color: var(--pz-white);
+            position: relative;
+        }
+        .footer::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 6px; background: var(--gradient-gold);
+        }
+        .footer-container { 
+            max-width: 1400px; margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 40px 30px; 
+        }
+        .footer-section h3 { 
+            font-size: 1.2rem; 
+            color: var(--pz-white); 
+            margin-bottom: 20px; 
+            letter-spacing: 1px;
+            position: relative; padding-bottom: 10px;
+        }
+        .footer-section h3::after {
+            content: ''; position: absolute; left: 0; bottom: 0;
+            width: 40px; height: 3px; 
+            background: var(--gradient-gold);
+            border-radius: 2px;
+        }
+        .footer-section p, .footer-section a { 
+            color: var(--pz-white); 
+            margin-bottom: 12px; 
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.95rem;
+        }
+        .footer-section a:hover { 
+            color: var(--pz-gold);
+            transform: translateX(5px);
+        }
+        .footer-section i { color: var(--pz-gold); width: 20px; flex-shrink: 0; }
+        
+        .social-links { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+        .social-link {
+            display: flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; 
+            background: var(--pz-graphite);
+            border-radius: 50%; 
+            color: var(--pz-white); 
+            font-size: 1.2rem;
+            transition: var(--transition); 
+            border: 1px solid var(--pz-charcoal);
+        }
+        .social-link:hover {
+            background: var(--gradient-gold); 
+            color: var(--pz-onyx);
+            transform: translateY(-4px) rotate(5deg);
+            box-shadow: var(--shadow-gold);
+            border-color: var(--pz-gold);
+        }
+        
+        .footer-bottom { 
+            max-width: 1400px; margin: 50px auto 0; 
+            padding-top: 20px; 
+            border-top: 1px solid var(--pz-charcoal); 
+            text-align: center; 
+            color: var(--pz-white); 
+            font-size: 0.9rem;
+        }
+
+        /* 🆕 ========== NUTRITION TABLE STYLES ========== */
+        .nutrition-section {
+            margin-top: 30px;
+            background: var(--pz-white);
+            border-radius: var(--radius-xl);
+            padding: 30px;
+            border: 2px solid var(--pz-light);
+            box-shadow: var(--shadow);
+        }
+
+        .nutrition-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--pz-onyx);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .nutrition-title i {
+            color: var(--pz-gold);
+        }
+
+        .nutrition-subtitle {
+            color: var(--pz-grey);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--pz-gold);
+        }
+
+        .nutrition-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--pz-cream);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nutrition-table thead {
+            background: var(--gradient-gold);
+        }
+
+        .nutrition-table thead th {
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 900;
+            color: var(--pz-onyx);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .nutrition-table thead th:last-child {
+            text-align: right;
+        }
+
+        .nutrition-table tbody tr {
+            border-bottom: 1px solid var(--pz-light);
+            transition: var(--transition);
+        }
+
+        .nutrition-table tbody tr:hover {
+            background: var(--pz-gold-glow);
+        }
+
+        .nutrition-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .nutrition-table tbody td {
+            padding: 14px 18px;
+            color: var(--pz-dark);
+            font-size: 0.95rem;
+        }
+
+        .nutrition-table tbody td:first-child {
+            font-weight: 600;
+            color: var(--pz-onyx);
+        }
+
+        .nutrition-table tbody td:last-child {
+            text-align: right;
+            font-weight: 800;
+            color: var(--pz-gold-dark);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.05rem;
+        }
+
+        .nutrition-table tbody td .unit {
+            font-size: 0.8rem;
+            color: var(--pz-silver);
+            margin-left: 4px;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--pz-cream); }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--gradient-gold); 
+            border-radius: 10px;
+            border: 2px solid var(--pz-cream);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--pz-gold-dark); }
+
+        @media (max-width: 1024px) {
+            .header-container { padding: 14px 20px; }
+            .logo img { height: 50px; }
+            .brand-name { font-size: 1.3rem; }
+            .header-btn { padding: 9px 14px; font-size: 0.85rem; }
+            .single-product-container { gap: 40px; padding: 40px 24px; }
+            .product-details h1 { font-size: 2.4rem; }
+            .product-details .price { font-size: 2.4rem; }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container { 
+                flex-direction: column; 
+                gap: 14px; 
+                padding: 14px 16px;
+            }
+            .logo { 
+                width: 100%; 
+                justify-content: center;
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--pz-light);
+            }
+            .logo img { height: 48px; }
+            .brand-name { font-size: 1.4rem; }
+            .brand-tagline { font-size: 0.65rem; }
+            
+            .header-actions { 
+                width: 100%; 
+                justify-content: center;
+                gap: 8px;
+            }
+            .header-btn { 
+                padding: 8px 12px; 
+                font-size: 0.8rem;
+                flex: 1;
+                justify-content: center;
+                min-width: 0;
+            }
+            .header-btn span { display: none; }
+            .cart-btn span:first-of-type { display: inline; }
+            
+            .single-product-container { 
+                grid-template-columns: 1fr; 
+                gap: 30px; 
+                padding: 20px 16px;
+                margin: 30px auto;
+            }
+            .product-image-container { 
+                padding: 30px; 
+                position: static;
+            }
+            .product-image-container img { max-height: 400px; }
+            .product-details { text-align: center; }
+            .product-details h1 { font-size: 2rem; }
+            .product-details .price { font-size: 2rem; }
+            .product-details .category { margin-bottom: 12px; }
+            
+            .quick-order-section { padding: 20px; }
+            .quick-order-form .form-row { grid-template-columns: 1fr; }
+
+            /* 🆕 Responsive Nutrition Table */
+            .nutrition-section { padding: 20px; }
+            .nutrition-title { font-size: 1.2rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .header-container { padding: 12px; }
+            .logo img { height: 42px; }
+            .brand-name { font-size: 1.2rem; letter-spacing: 1px; }
+            .brand-tagline { font-size: 0.6rem; letter-spacing: 2px; }
+            
+            .header-actions { gap: 6px; }
+            .header-btn { 
+                padding: 8px 10px; 
+                font-size: 0.75rem;
+                gap: 5px;
+            }
+            .header-btn i { font-size: 0.9rem; }
+            
+            .single-product-container { gap: 20px; padding: 15px 12px; }
+            .product-image-container { padding: 20px; }
+            .product-image-container img { max-height: 300px; }
+            .product-details h1 { font-size: 1.6rem; }
+            .product-details .price { font-size: 1.8rem; }
+            .product-details .description { font-size: 0.95rem; }
+            .add-to-cart-hero { padding: 16px; font-size: 1rem; }
+            .flavor-selector-btn { flex: 1 1 140px; font-size: 0.9rem; padding: 12px !important; }
+            
+            .quick-order-section { padding: 16px; }
+            .quick-order-title { font-size: 1.2rem; }
+
+            /* 🆕 Mobile Nutrition Table */
+            .nutrition-section { padding: 18px; }
+            .nutrition-title { font-size: 1.1rem; }
+            .nutrition-table thead th,
+            .nutrition-table tbody td { padding: 10px 12px; font-size: 0.85rem; }
+            .nutrition-table tbody td:last-child { font-size: 0.95rem; }
+        }
+        
+        @media (max-width: 360px) {
+            .header-btn { padding: 7px 8px; font-size: 0.7rem; }
+            .logo img { height: 38px; }
+            .brand-name { font-size: 1.1rem; }
+            .product-details h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Power Zone Logo">
+                <div class="logo-text">
+                    <div class="brand-name">Power Zone</div>
+                    <div class="brand-tagline">Nutrition</div>
+                </div>
+            </a>
+            <div class="header-actions">
+                <a href="tracking.html" class="header-btn">
+                    <i class="fa-solid fa-truck-fast"></i> 
+                    <span>Suivi</span>
+                </a>
+                <button class="header-btn cart-btn" id="cartBtn">
+                    <i class="fa-solid fa-cart-shopping"></i> 
+                    <span>Panier</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <a href="couverture.html" class="header-btn">
+                    <i class="fa-solid fa-map-location-dot"></i> 
+                    <span>Couverture</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div id="productsGrid" style="display:none;"></div>
+
+    <main class="single-product-container" id="single-product-container">
+        <div style="grid-column: 1/-1; text-align:center; padding: 100px 0;">
+            <i class="fa-solid fa-dumbbell fa-spin" style="font-size:3rem; color:var(--pz-gold); margin-bottom:20px;"></i>
+            <h2 style="color: var(--pz-onyx);">Chargement des données du produit...</h2>
+        </div>
+    </main>
+
+    <!-- Cart Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-cart-shopping"></i> PANIER</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cart-items" id="cartItems"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="cart-total">TOTAL: <span id="totalPrice">0.00</span> DA</div>
+                <button class="btn btn-primary" id="checkoutBtn" disabled>COMMANDER <i class="fa-solid fa-bolt"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Form Modal -->
+    <div class="modal-overlay" id="orderFormModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-clipboard-list"></i> FINALISER LA COMMANDE</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label class="form-label">MÉTHODE DE LIVRAISON *</label>
+                        <select class="form-control" id="orderType" required>
+                            <option value="">Sélectionner</option>
+                            <option value="domicile">Livraison à domicile</option>
+                            <option value="stopdesk">Stop Desk (Point relais)</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">PRÉNOM *</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">NOM *</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">TÉLÉPHONE 1 *</label>
+                            <input type="tel" class="form-control" id="phone1" required placeholder="05/06/07...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">TÉLÉPHONE 2</label>
+                            <input type="tel" class="form-control" id="phone2" placeholder="Optionnel">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">WILAYA *</label>
+                            <select class="form-control" id="wilaya" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">COMMUNE *</label>
+                            <select class="form-control" id="commune" required></select>
+                        </div>
+                    </div>
+                    <div class="shipping-info" id="shippingInfo">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:var(--pz-dark);">
+                            <span>Frais de livraison d'élite:</span>
+                            <span id="shippingPrice">0 DA</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:1.3rem; align-items:center;">
+                            <span style="font-family:'Montserrat', sans-serif; font-weight:900; color:var(--pz-onyx);">TOTAL NET:</span>
+                            <span id="grandTotal" style="font-size:1.6rem; font-weight:900;">0 DA</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Annuler</button>
+                <button class="btn btn-primary" type="submit" form="orderForm">Valider la Commande <i class="fa-solid fa-check-double"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal" style="text-align:center;">
+            <div class="modal-body" style="padding: 50px 30px;">
+                <div style="width:100px; height:100px; background:var(--pz-success-light); border:2px solid var(--pz-success); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 30px;">
+                    <i class="fa-solid fa-trophy" style="font-size:3rem; color:var(--pz-success);"></i>
+                </div>
+                <h3 style="margin-bottom:20px; font-size:2rem; color:var(--pz-success);">VICTOIRE !</h3>
+                <p style="color:var(--pz-grey); margin-bottom:30px; font-size:1.1rem;">La commande a été transmise à notre quartier général.</p>
+                <div style="background:var(--pz-onyx); border:2px solid var(--pz-gold); padding:25px; border-radius:var(--radius); margin-bottom:30px;">
+                    <p style="font-size:0.9rem; color:var(--pz-silver); margin-bottom:10px; text-transform:uppercase;">CODE D'OPÉRATION (Numéro)</p>
+                    <p style="font-size:2.5rem; font-weight:900; color:var(--pz-gold); font-family:'Montserrat', sans-serif; letter-spacing:2px;" id="orderNumber"></p>
+                </div>
+                <p style="font-size:0.9rem; color:var(--pz-gold-dark); margin-bottom:30px;"><i class="fa-solid fa-camera"></i> Capturez cet écran pour le suivi.</p>
+                <a href="index.html" class="btn btn-primary" style="width:100%; display:flex;">Continuer l'Entraînement</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3><span style="background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">POWER</span>ZONE</h3>
+                <p>L'excellence n'est pas un acte, mais une habitude. Rejoignez le cercle des champions avec nos suppléments certifiés premium.</p>
+            </div>
+            <div class="footer-section">
+                <h3>QG COMMANDEMENT</h3>
+                <a href="tel:+213782945288">
+                    <i class="fa-solid fa-phone"></i> 0782945288
+                </a>
+                <a href="mailto:contact@powerzone.dz">
+                    <i class="fa-solid fa-envelope"></i> contact@powerzone.dz
+                </a>
+                <a href="https://maps.app.goo.gl/Ap2ccMBJmuJY2A7c7" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-location-crosshairs"></i> Voir sur Google Maps
+                </a>
+            </div>
+            <div class="footer-section">
+                <h3>SUIVEZ-NOUS</h3>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/share/1Dhn4AYi75/" target="_blank" rel="noopener" class="social-link" title="Facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.instagram.com/wahbi_zoghbi_nutrition?igsh=MW9lZ3huamI5ZnF3NQ==" target="_blank" rel="noopener" class="social-link" title="Instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://www.tiktok.com/@wahbi.zoghbinutrition?_r=1&_t=ZS-94QuUOKJNy9" target="_blank" rel="noopener" class="social-link" title="TikTok">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>LOGISTIQUE</h3>
+                <p><i class="fa-solid fa-shield-halved"></i> Paiement 100% sécurisé à la livraison</p>
+                <p><i class="fa-solid fa-truck-fast"></i> Déploiement rapide sur les 58 wilayas</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© <span id="currentYear"></span> Power Zone. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+
+    <!-- ========== WILAYAS & SHIPPING DATA ========== -->
+    <script>
+        const wilayasData = {
+            "01 - Adrar": ["Adrar", "Aoulef", "Charouine", "Reggane", "Tamentit", "Tsabit", "Zaouiet Kounta"],
+            "02 - Chlef": ["Chlef", "Abou", "Ain Merane", "Boukadir", "El Karimia", "Oued Fodda", "Tadjena", "Zeboudja"],
+            "03 - Laghouat": ["Laghouat", "Ain Madhi", "Brida", "El Ghicha", "Hassi Delaa", "Ksar El Hirane", "Sidi Makhlouf"],
+            "04 - Oum El Bouaghi": ["Oum El Bouaghi", "Ain Beida", "Ain M'lila", "Behir Chergui", "El Amiria", "Sigus", "Souk Naamane"],
+            "05 - Batna": ["Batna", "Ain Touta", "Arris", "Barika", "Bouzina", "El Madher", "Fesdis", "Ghassira", "Merouana", "N'Gaous", "Ras El Aioun", "Tazoult", "Timgad"],
+            "06 - Béjaïa": ["Béjaïa", "Akbou", "Amizour", "Chemini", "Darguina", "El Kseur", "Ifnayen", "Kherrata", "Seddouk", "Tichy", "Tifra", "Timezrit"],
+            "07 - Biskra": ["Biskra", "Ain Naga", "Bordj Ben Azzouz", "Chetma", "El Kantara", "El Outaya", "M'Chouneche", "Ouled Djellal", "Sidi Okba", "Zeribet El Oued"],
+            "08 - Béchar": ["Béchar", "Abadla", "Beni Ounif", "Kenadsa", "Lahmar", "Mechraa Houari Boumedienne", "Taghit"],
+            "09 - Blida": ["Blida", "Boufarik", "Bougara", "Chebli", "Chiffa", "El Affroun", "Mouzaia", "Oued Alleug", "Souhane"],
+            "10 - Bouira": ["Bouira", "Ain Bessem", "Bechloul", "Bordj Okhriss", "El Adjiba", "Haizer", "Lakhdaria", "M'Chedallah", "Sour El Ghozlane"],
+            "11 - Tamanrasset": ["Tamanrasset", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Amguel", "In Ghar", "In Salah", "Tazrouk"],
+            "12 - Tébessa": ["Tébessa", "Ain Zerga", "Bir El Ater", "Cheria", "El Aouinet", "El Ogla", "Morsott", "Negrine", "Ouenza", "Stah Guentis"],
+            "13 - Tlemcen": ["Tlemcen", "Ain Fezza", "Ain Youcef", "Beni Bahdel", "Beni Snous", "Bensekrane", "El Aricha", "El Fehoul", "Ghazaouet", "Hennaya", "Maghnia", "Mansourah", "Nedroma", "Remchi", "Sebdou", "Zenata"],
+            "14 - Tiaret": ["Tiaret", "Ain Deheb", "Ain Kermes", "Djillali Ben Amar", "Frenda", "Hamadia", "Ksar Chellala", "Mahdia", "Mechraa Safa", "Medroussa", "Oued Lili", "Rahouia", "Sougueur"],
+            "15 - Tizi Ouzou": ["Tizi Ouzou", "Ain El Hammam", "Akbil", "Azeffoun", "Boghni", "Boudjima", "Bouira", "Draa El Mizan", "Iferhounene", "Larbaa Nath Irathen", "Maatkas", "Makouda", "Mizrana", "Ouacif", "Ouadhia", "Tigzirt", "Timizart"],
+            "16 - Alger": ["Alger Centre", "Bab El Oued", "Birkhadem", "Bouzareah", "Dar El Beida", "El Biar", "Hussein Dey", "Kouba", "Mohamed Belouizdad", "Oued Koriche", "Sidi M'Hamed"],
+            "17 - Djelfa": ["Djelfa", "Ain Chouhada", "Ain El Ibel", "Birine", "Charef", "El Idrissia", "Faidh El Botma", "Guernini", "Hassi Bahbah", "Hassi El Euch", "Messaad", "Sidi Ladjel"],
+            "18 - Jijel": ["Jijel", "Ain Taya", "Boucif Ouled Askeur", "Chahna", "El Ancer", "El Milia", "Emir Abdelkader", "Ghebala", "Kaous", "Ouled Rabah", "Taher", "Texenna", "Ziama Mansouriah"],
+            "19 - Sétif": ["Sétif", "Ain Abessa", "Ain Arnat", "Ain Azel", "Ain El Kebira", "Ain Oulmene", "Amoucha", "Babor", "Bazer Sakhra", "Beidha Bordj", "Beni Aziz", "Bir El Arch", "Bouandas", "Bouga", "Djemila", "El Eulma", "Guenzet", "Guidjel", "Hammam Guergour", "Harbil", "Maaouia", "Maoklane", "Salah Bey", "Serdj El Ghoul", "Tachouda", "Tamazirt", "Tella", "Zerdaza"],
+            "20 - Saïda": ["Saïda", "Ain El Hadjar", "Ain Sekhouna", "Doui Thabet", "El Hassasna", "Hounet", "Maamora", "Moulay Larbi", "Ouled Brahim", "Ouled Khaled", "Youb"],
+            "21 - Skikda": ["Skikda", "Ain Kechra", "Azzaba", "Ben Azzouz", "Collo", "El Harrouch", "Oued Zehour", "Ramdane Djamel", "Sidi Mezghiche", "Tamalous", "Zitouna"],
+            "22 - Sidi Bel Abbès": ["Sidi Bel Abbès", "Ain Adden", "Ain Thrid", "Ben Badis", "Marhoum", "Mérine", "Mostefa Ben Brahim", "Moulay Slissen", "Oued Taourira", "Ras El Ma", "Sfisef", "Tafraoui", "Telagh", "Ténira"],
+            "23 - Annaba": ["Annaba", "Ain Berda", "Berrahal", "Chorfa", "El Bouni", "El Hadjar", "Oued El Aneb", "Seraidi", "Treat"],
+            "24 - Guelma": ["Guelma", "Ain Ben Beida", "Ain Reggada", "Bou Hamdane", "Bouati Mahmoud", "Dahoua", "El Fedjoudj Boughrara", "Hammam Debagh", "Hammam N'Bails", "Heliopolis", "Khezaras", "Oued Zenati", "Ras El Agba", "Salaoua Announa", "Zemmoura"],
+            "25 - Constantine": ["Constantine", "Ain Smara", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Ibn Ziad", "Messaouda", "Zighoud Youcef"],
+            "26 - Médéa": ["Médéa", "Ain Boucif", "Ain Ouksir", "Aziz", "Berrouaghia", "Chahbounia", "Chelif", "Deux Bassins", "Djouab", "El Azizia", "El Omaria", "Guelb El Kebir", "Ksar El Boukhari", "Mihoub", "Oued Harbil", "Ouled Deid", "Ouled Hellal", "Ouled Maaref", "Seghouane", "Si Mahdjoub", "Souagui", "Tablat"],
+            "27 - Mostaganem": ["Mostaganem", "Ain Tedles", "Ain Sidi Cherif", "Bouguirat", "Hassi Mamèche", "Kheir Eddine", "Mesra", "Ouled Boughalem", "Ouled Malah", "Sidi Ali", "Sidi Lakhdar", "Sirat", "Stidia", "Tazgait"],
+            "28 - M'Sila": ["M'Sila", "Ain El Melh", "Ben Srour", "Bou Saada", "Chellal", "Djebel Messaad", "El Hamel", "El Houamed", "Hammam Dhalaâ", "Khoubana", "Maadid", "Magra", "Medjedel", "Ouanougha", "Ouled Derradj", "Ouled Sidi Brahim", "Sidi Aissa", "Sidi Hadjeres", "Sidi M'hamed", "Souamaa", "Tarmount", "Zarzit"],
+            "29 - Mascara": ["Mascara", "Ain Farès", "Ain Fekroun", "Ain Fekan", "Aouf", "El Bordj", "El Gaada", "El Ghomri", "El Keurt", "El Menaouer", "Froha", "Ghriss", "Hachem", "Hacine", "Maoussa", "Mohammadia", "Mocta Douz", "Nesmoth", "Oggaz", "Oued El Abtal", "Oued Taria", "Ras Ain Amirouche", "Sidi Abdeldjebar", "Sidi Kada", "Sidi Zahar", "Tighennif", "Tizi", "Zahana"],
+            "30 - Ouargla": ["Ouargla", "Ain Beida", "El Allia", "El Hadjira", "El Hajeb", "Hassi Ben Abdellah", "Hassi Messaoud", "N'Goussa", "Rouissat", "Sidi Khouiled", "Taibet", "Tebesbest", "Touggourt", "Zaouia El Abidia"],
+            "31 - Oran": ["Oran", "Arzew", "Bethioua", "Bir El Djir", "Es Senia", "Gdyel", "Hassi Bounif", "Marsat El Hadjadj", "Mers El Kebir", "Misserghin", "Oued Tlelat", "Sidi Ben Yebka", "Sidi Chami"],
+            "32 - El Bayadh": ["El Bayadh", "Ain El Orak", "Bougtoub", "Brézina", "Chellala", "El Abiodh Sidi Cheikh", "El Bnoud", "Ghassoul", "Kef El Ahmar", "Rogassa", "Sidi Slimane", "Stitten"],
+            "33 - Illizi": ["Illizi", "Bordj Omar Driss", "Djanet", "Debdeb", "El Borma", "In Amenas", "In Guezzam", "In Salah", "Tin Zaouatine"],
+            "34 - Bordj Bou Arréridj": ["Bordj Bou Arréridj", "Ain Taghrout", "Belimour", "Bir Kasdali", "Bordj Ghdir", "Bordj Zemmoura", "Colla", "El Achir", "El Anser", "El Hamadia", "El Main", "El M'hir", "Ghilassa", "Haraza", "Hasnaoua", "Ksour", "Mansourah", "Medjana", "Ouled Brahem", "Ouled Dahmane", "Ouled Sidi Brahim", "Ras El Oued", "Righa", "Taglait", "Teniet En Nasr"],
+            "35 - Boumerdès": ["Boumerdès", "Ammal", "Baghlia", "Bordj Menaiel", "Boudouaou", "Boudouaou El Bahri", "Chabet El Ameur", "Dellys", "Isser", "Khemis El Khechna", "Legata", "Naciria", "Ouled Aissa", "Ouled Fayet", "Si Mustapha", "Souk El Had", "Thénia"],
+            "36 - El Tarf": ["El Tarf", "Ain Kercha", "Ben M'Hidi", "Besbes", "Bouhadjar", "Boutheldja", "Dréan", "El Kala", "Lac des Oiseaux", "Souarekh"],
+            "37 - Tindouf": ["Tindouf", "Aouinet Bel Egrâ", "Fenoughil", "Oum El Assel"],
+            "38 - Tissemsilt": ["Tissemsilt", "Ammari", "Belaassel Bouzegza", "Beni Chaib", "Boucaid", "Bouhatem", "Boukhanafis", "Khemisti", "Lazharia", "Layoune", "Maacem", "Sidi Abed", "Sidi Boutouchent", "Sidi Lantri", "Tamalaht", "Theniet El Had"],
+            "39 - El Oued": ["El Oued", "Bayadha", "Debila", "El Ogla", "Guemar", "Hassi Khelifa", "Magrane", "Mih Ouensa", "Oued Souf", "Reguiba", "Robbah", "Taleb Larbi", "Trifaoui"],
+            "40 - Khenchela": ["Khenchela", "Ain Touila", "Babar", "Bouhmama", "Chechar", "El Hamma", "El Mahmal", "El Mahres", "El Ouenza", "Hammam Essalihine", "Kais", "Ouled Rechache", "Remila", "Yabous"],
+            "41 - Souk Ahras": ["Souk Ahras", "Ain Zana", "Bir Bouhouche", "Heddada", "Khedara", "M'Daourouch", "Mechroha", "Merahna", "Ouled Driss", "Oum El Adhaïm", "Sedrata", "Taoura", "Zouabi"],
+            "42 - Tipaza": ["Tipaza", "Ahmar El Ain", "Bou Ismail", "Cherchell", "Damous", "Fouka", "Gouraya", "Hadjout", "Koléa", "Menaceur", "Nador", "Sidi Amar", "Sidi Ghiles", "Sidi Rached", "Sidi Semiane", "Tipasa"],
+            "43 - Mila": ["Mila", "Ain Beida", "Ain Mellouk", "Chelghoum Laid", "El Ayadi Barbes", "El Barka", "El Eulma", "Ferdjioua", "Grarem Gouga", "Hamala", "Oued Athmania", "Oued Endja", "Oued Seguen", "Rouached", "Sidi Khelifa", "Tassadane Haddada", "Teleghma", "Terrai Bainen", "Yahia Beniguecha"],
+            "44 - Aïn Defla": ["Aïn Defla", "Arib", "Bathia", "Belaas", "Bir Ould Khelifa", "Birbal", "Birhoum", "Boumedfaa", "Djelida", "Djemaa Ouled Cheikh", "El Amra", "El Attaf", "El Hassania", "El Maine", "Hammam Righa", "Hoceinia", "Khemis Miliana", "Miliana", "Oued Chorfa", "Oued Djemaa", "Rouina", "Tarik Ibn Ziad", "Tiberkanine", "Zeddine"],
+            "45 - Naâma": ["Naâma", "Ain Ben Khelil", "Ain Sefra", "Asla", "Djeniene Bourezg", "El Bier", "Makmen Ben Amer", "Mecheria", "Moghrar", "Sfissifa", "Tiout"],
+            "46 - Aïn Témouchent": ["Aïn Témouchent", "Ain Kihel", "Aoubellil", "Beni Saf", "Bouzedjar", "El Amria", "El Malah", "Hammam Bouhadjar", "Hassasna", "Oued Berkeche", "Oued Sabah", "Sidi Ben Adda", "Sidi Boumediene", "Sidi Ourial", "Terga", "Tlemcen"],
+            "47 - Ghardaïa": ["Ghardaïa", "Berriane", "Bounoura", "Dhayet Bendhahoua", "El Atteuf", "El Guerrara", "El Meniaa", "Metlili", "Sebseb", "Zelfana"],
+            "48 - Relizane": ["Relizane", "Ain Rahma", "Ain Tarek", "Ammi Moussa", "Belassel Bouzegza", "Beni Dergoun", "Beni Zentis", "Djidiouia", "El Hamadna", "El Matmar", "El Ouldja", "Had Echkalla", "Hamri", "Kalaa", "Mazouna", "Mendes", "Oued Rhiou", "Oued Sly", "Ramka", "Sidi Khettab", "Sidi Lazreg", "Souk El Had", "Yellel"],
+            "49 - Timimoun": ["Timimoun", "Aougrout", "Bordj Badji Mokhtar", "Charouine", "Ouled Said", "Talmine", "Tinerkouk", "Touggourt"],
+            "50 - Bordj Badji Mokhtar": ["Bordj Badji Mokhtar", "Tin Zaouatine"],
+            "51 - Ouled Djellal": ["Ouled Djellal", "Chaiba", "Sidi Khaled"],
+            "52 - Béni Abbès": ["Béni Abbès", "Kerzaz", "Ouled Khodeir", "Tabelbala"],
+            "53 - In Salah": ["In Salah", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Ghar", "Tazrouk"],
+            "54 - In Guezzam": ["In Guezzam", "Tin Zaouatine"],
+            "55 - Touggourt": ["Touggourt", "El Hadjira", "El Ogla", "Nezla", "Tebesbest", "Zaouia El Abidia"],
+            "56 - Djanet": ["Djanet", "Bordj Omar Driss"],
+            "57 - El M'Ghair": ["El M'Ghair", "Djamaa", "Oum Touyour", "Sidi Khellil"],
+            "58 - El Meniaa": ["El Meniaa", "Hassi Gara", "Hassi Fehal"]
+        };
+
+        const shippingPrices = {
+            "01 - Adrar": 1500, "02 - Chlef": 800, "03 - Laghouat": 1000, "04 - Oum El Bouaghi": 800,
+            "05 - Batna": 800, "06 - Béjaïa": 800, "07 - Biskra": 1000, "08 - Béchar": 1200,
+            "09 - Blida": 600, "10 - Bouira": 700, "11 - Tamanrasset": 2000, "12 - Tébessa": 900,
+            "13 - Tlemcen": 800, "14 - Tiaret": 900, "15 - Tizi Ouzou": 700, "16 - Alger": 500,
+            "17 - Djelfa": 1000, "18 - Jijel": 800, "19 - Sétif": 800, "20 - Saïda": 900,
+            "21 - Skikda": 800, "22 - Sidi Bel Abbès": 800, "23 - Annaba": 800, "24 - Guelma": 900,
+            "25 - Constantine": 800, "26 - Médéa": 700, "27 - Mostaganem": 800, "28 - M'Sila": 800,
+            "29 - Mascara": 800, "30 - Ouargla": 1100, "31 - Oran": 800, "32 - El Bayadh": 1200,
+            "33 - Illizi": 1900, "34 - Bordj Bou Arréridj": 800, "35 - Boumerdès": 600, "36 - El Tarf": 900,
+            "37 - Tindouf": 1700, "38 - Tissemsilt": 800, "39 - El Oued": 1100, "40 - Khenchela": 900,
+            "41 - Souk Ahras": 900, "42 - Tipaza": 600, "43 - Mila": 800, "44 - Aïn Defla": 800,
+            "45 - Naâma": 1200, "46 - Aïn Témouchent": 800, "47 - Ghardaïa": 1100, "48 - Relizane": 800,
+            "49 - Timimoun": 1500, "50 - Bordj Badji Mokhtar": 1500, "51 - Ouled Djellal": 1000,
+            "52 - Béni Abbès": 1200, "53 - In Salah": 1800, "54 - In Guezzam": 3500,
+            "55 - Touggourt": 1000, "56 - Djanet": 2200, "57 - El M'Ghair": 1800, "58 - El Meniaa": 1100
+        };
+
+        const stopDeskPrices = {
+            "01 - Adrar": 1000, "02 - Chlef": 500, "03 - Laghouat": 600, "04 - Oum El Bouaghi": 500,
+            "05 - Batna": 500, "06 - Béjaïa": 500, "07 - Biskra": 600, "08 - Béchar": 800,
+            "09 - Blida": 400, "10 - Bouira": 450, "11 - Tamanrasset": 1500, "12 - Tébessa": 600,
+            "13 - Tlemcen": 500, "14 - Tiaret": 600, "15 - Tizi Ouzou": 450, "16 - Alger": 300,
+            "17 - Djelfa": 600, "18 - Jijel": 500, "19 - Sétif": 550, "20 - Saïda": 600,
+            "21 - Skikda": 500, "22 - Sidi Bel Abbès": 500, "23 - Annaba": 500, "24 - Guelma": 600,
+            "25 - Constantine": 500, "26 - Médéa": 450, "27 - Mostaganem": 500, "28 - M'Sila": 500,
+            "29 - Mascara": 500, "30 - Ouargla": 700, "31 - Oran": 500, "32 - El Bayadh": 800,
+            "33 - Illizi": 1500, "34 - Bordj Bou Arréridj": 500, "35 - Boumerdès": 400, "36 - El Tarf": 600,
+            "37 - Tindouf": 1000, "38 - Tissemsilt": 500, "39 - El Oued": 700, "40 - Khenchela": 600,
+            "41 - Souk Ahras": 600, "42 - Tipaza": 400, "43 - Mila": 500, "44 - Aïn Defla": 500,
+            "45 - Naâma": 800, "46 - Aïn Témouchent": 500, "47 - Ghardaïa": 700, "48 - Relizane": 500,
+            "49 - Timimoun": 1000, "50 - Bordj Badji Mokhtar": 1000, "51 - Ouled Djellal": 600,
+            "52 - Béni Abbès": 800, "53 - In Salah": 1200, "54 - In Guezzam": 3500,
+            "55 - Touggourt": 600, "56 - Djanet": 1600, "57 - El M'Ghair": 1800, "58 - El Meniaa": 800
+        };
+
+        function getWilayaKey(code) {
+            const paddedCode = code.padStart(2, '0');
+            return Object.keys(wilayasData).find(key => key.startsWith(paddedCode + ' -')) || null;
+        }
+
+        function getShippingPrice(wilayaCode, orderType) {
+            const key = getWilayaKey(wilayaCode);
+            if (!key) return 0;
+            return orderType === 'domicile' ? (shippingPrices[key] || 0) : (stopDeskPrices[key] || 0);
+        }
+    </script>
+
+    <script type="module">
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { db } from './firebase-config.js';
+
+        let currentProduct = null;
+        let currentProductId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+            const container = document.getElementById('single-product-container');
+
+            if (!productId) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 100px 0;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; color:var(--pz-danger); margin-bottom:20px;"></i>
+                    <h2 style="color: var(--pz-onyx);">Produit introuvable</h2>
+                    <a href="index.html" class="btn btn-outline" style="margin-top:20px; display:inline-flex;">Retour à la boutique</a>
+                </div>`;
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "produits", productId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const product = docSnap.data();
+                    currentProduct = product;
+                    currentProductId = docSnap.id;
+                    
+                    const pName = product.name || 'Produit';
+                    const pImage = product.image || 'https://via.placeholder.com/600x600?text=Produit';
+                    const pCategory = product.category || 'Catégorie';
+                    const pPrice = parseFloat(product.price) || 0;
+                    const pDesc = (product.description || '').replace(/\n/g, '<br>');
+                    const pQty = parseInt(product.quantity) || 0;
+
+                    document.title = `${pName} | Power Zone`;
+
+                    const stockHTML = pQty > 0
+                        ? `<div class="status-badge in-stock"><i class="fa-solid fa-check"></i> ${pQty} EN STOCK</div>`
+                        : `<div class="status-badge out-of-stock"><i class="fa-solid fa-xmark"></i> RUPTURE DE STOCK</div>`;
+
+                    const cartBtnHTML = pQty > 0
+                        ? `<button class="add-to-cart-hero" onclick="addToCartFromPage('${docSnap.id}')">
+                            <i class="fa-solid fa-cart-plus"></i> Ajouter à Panier
+                        </button>`
+                        : `<button class="add-to-cart-hero" disabled>
+                            <i class="fa-solid fa-ban"></i> Indisponible
+                        </button>`;
+
+                    const quickOrderHTML = pQty > 0 ? `
+                        <div class="divider">OU</div>
+                        
+                        <div class="quick-order-section">
+                            <h3 class="quick-order-title">
+                                <i class="fa-solid fa-bolt"></i>
+                                Commande Rapide
+                            </h3>
+                            <p class="quick-order-subtitle">Commandez directement sans passer par le panier</p>
+                            
+                            <form class="quick-order-form" id="quickOrderForm">
+                                <div class="form-group">
+                                    <label class="form-label">MÉTHODE DE LIVRAISON *</label>
+                                    <select class="form-control" id="quickOrderType" required>
+                                        <option value="">Sélectionner</option>
+                                        <option value="domicile">Livraison à domicile</option>
+                                        <option value="stopdesk">Stop Desk (Point relais)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">PRÉNOM *</label>
+                                        <input type="text" class="form-control" id="quickFirstName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">NOM *</label>
+                                        <input type="text" class="form-control" id="quickLastName" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">TÉLÉPHONE 1 *</label>
+                                        <input type="tel" class="form-control" id="quickPhone1" required placeholder="05/06/07...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">TÉLÉPHONE 2</label>
+                                        <input type="tel" class="form-control" id="quickPhone2" placeholder="Optionnel">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">WILAYA *</label>
+                                        <select class="form-control" id="quickWilaya" required></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">COMMUNE *</label>
+                                        <select class="form-control" id="quickCommune" required></select>
+                                    </div>
+                                </div>
+                                
+                                <div class="quick-order-shipping" id="quickShippingInfo">
+                                    <div class="quick-order-shipping-row">
+                                        <span>Prix du produit:</span>
+                                        <span id="quickProductPrice">${pPrice.toFixed(2)} DA</span>
+                                    </div>
+                                    <div class="quick-order-shipping-row">
+                                        <span>Frais de livraison:</span>
+                                        <span id="quickShippingPrice">0 DA</span>
+                                    </div>
+                                    <div class="quick-order-shipping-row">
+                                        <span>TOTAL:</span>
+                                        <span id="quickGrandTotal">${pPrice.toFixed(2)} DA</span>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="quick-order-submit">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                    Confirmer la Commande
+                                </button>
+                            </form>
+                        </div>
+                    ` : '';
+
+                    // 🆕 Nutrition Table HTML
+                    const nutritionHTML = (product.ingredients && product.ingredients.length > 0) ? `
+                        <div class="nutrition-section">
+                            <h3 class="nutrition-title">
+                                <i class="fa-solid fa-flask"></i>
+                                Ingrédients & Valeurs Nutritionnelles
+                            </h3>
+                            <p class="nutrition-subtitle">Composition détaillée de ce produit</p>
+                            <table class="nutrition-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fa-solid fa-vial"></i> Composant</th>
+                                        <th>Quantité</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${product.ingredients.map(ing => `
+                                        <tr>
+                                            <td>${ing.name}</td>
+                                            <td>${ing.value}<span class="unit">${ing.unit || 'g'}</span></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : '';
+
+                    container.innerHTML = `
+                        <div class="product-image-container">
+                            <img id="main-product-image" src="${pImage}" alt="${pName}" onerror="this.src='https://via.placeholder.com/600x600?text=Produit'">
+                        </div>
+                        <div class="product-details">
+                            <div class="category">${pCategory}</div>
+                            <h1>${pName}</h1>
+                            <div class="price">${pPrice.toFixed(2)} DA</div>
+                            ${stockHTML}
+                            <div class="description">${pDesc}</div>
+
+                            ${(product.flavors && product.flavors.length > 0) ? `
+                            <div class="flavors-selection" style="margin: 20px 0;">
+                                <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--pz-onyx); text-align: left;">Goûts disponibles :</h3>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                                    ${product.flavors.map((f, i) => `
+                                        <button class="flavor-selector-btn ${i === 0 ? 'active' : ''}" 
+                                                data-image="${f.image || pImage}">
+                                            ${f.name}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>` : ''}
+
+                            ${nutritionHTML}
+
+                            <div style="margin-top: 40px;">
+                                ${cartBtnHTML}
+                            </div>
+                            
+                            ${quickOrderHTML}
+                        </div>
+                    `;
+
+                    if (product.flavors && product.flavors.length > 0) {
+                        const mainImg = document.getElementById('main-product-image');
+                        const btns = document.querySelectorAll('.flavor-selector-btn');
+
+                        if (product.flavors[0].image) {
+                            mainImg.src = product.flavors[0].image;
+                        }
+
+                        btns.forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                btns.forEach(b => b.classList.remove('active'));
+                                btn.classList.add('active');
+                                const newImgSrc = btn.getAttribute('data-image');
+                                if (newImgSrc && newImgSrc !== 'undefined' && newImgSrc !== '') {
+                                    mainImg.src = newImgSrc;
+                                }
+                            });
+                        });
+                    }
+
+                    if (pQty > 0) {
+                        initQuickOrderForm(pPrice);
+                    }
+                } else {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 100px 0;">
+                        <i class="fa-solid fa-box-open" style="font-size:3rem; color:var(--pz-silver); margin-bottom:20px;"></i>
+                        <h2 style="color: var(--pz-onyx);">Ce produit n'existe plus</h2>
+                        <a href="index.html" class="btn btn-outline" style="margin-top:20px; display:inline-flex;">Retour à la boutique</a>
+                    </div>`;
+                }
+            } catch (error) {
+                console.error("Erreur de chargement:", error);
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 100px 0;">
+                    <h2 style="color:var(--pz-danger);">Erreur de connexion</h2>
+                </div>`;
+            }
+        });
+
+        function initQuickOrderForm(productPrice) {
+            const form = document.getElementById('quickOrderForm');
+            const orderType = document.getElementById('quickOrderType');
+            const wilaya = document.getElementById('quickWilaya');
+            const commune = document.getElementById('quickCommune');
+            const shippingInfo = document.getElementById('quickShippingInfo');
+            
+            loadWilayas(wilaya, commune);
+            
+            orderType.addEventListener('change', () => {
+                calculateQuickShipping(productPrice);
+            });
+            
+            wilaya.addEventListener('change', () => {
+                loadCommunes(wilaya.value, commune);
+                calculateQuickShipping(productPrice);
+            });
+            
+            commune.addEventListener('change', () => {
+                calculateQuickShipping(productPrice);
+            });
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitQuickOrder(productPrice);
+            });
+        }
+
+        function calculateQuickShipping(productPrice) {
+            const orderType = document.getElementById('quickOrderType').value;
+            const wilaya = document.getElementById('quickWilaya').value;
+            const commune = document.getElementById('quickCommune').value;
+            const shippingInfo = document.getElementById('quickShippingInfo');
+            
+            if (!orderType || !wilaya || !commune) {
+                shippingInfo.classList.remove('active');
+                return;
+            }
+            
+            const shippingPrice = getShippingPrice(wilaya, orderType);
+            const grandTotal = productPrice + shippingPrice;
+            
+            document.getElementById('quickShippingPrice').textContent = shippingPrice.toLocaleString('fr-FR') + ' DA';
+            document.getElementById('quickGrandTotal').textContent = grandTotal.toLocaleString('fr-FR') + ' DA';
+            
+            shippingInfo.classList.add('active');
+        }
+
+        async function submitQuickOrder(productPrice) {
+            const submitBtn = document.querySelector('.quick-order-submit');
+            const originalHTML = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Envoi en cours...';
+            
+            try {
+                const orderType = document.getElementById('quickOrderType').value;
+                const firstName = document.getElementById('quickFirstName').value;
+                const lastName = document.getElementById('quickLastName').value;
+                const phone1 = document.getElementById('quickPhone1').value;
+                const phone2 = document.getElementById('quickPhone2').value;
+                const wilayaCode = document.getElementById('quickWilaya').value;
+                const commune = document.getElementById('quickCommune').value;
+                
+                const wilayaKey = getWilayaKey(wilayaCode);
+                const wilayaName = wilayaKey ? wilayaKey.split(' - ')[1] : wilayaCode;
+                
+                const shippingPrice = getShippingPrice(wilayaCode, orderType);
+                const grandTotal = productPrice + shippingPrice;
+                
+                let selectedFlavor = null;
+                const activeBtn = document.querySelector('.flavor-selector-btn.active');
+                if (activeBtn) {
+                    selectedFlavor = activeBtn.textContent.trim();
+                }
+                
+                const orderData = {
+                    orderNumber: generateOrderNumber(),
+                    date: new Date().toISOString(),
+                    status: 'pending',
+                    orderType: orderType,
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone1: phone1,
+                    phone2: phone2 || '',
+                    wilaya: wilayaName,
+                    wilayaCode: wilayaCode,
+                    commune: commune,
+                    products: [{
+                        id: currentProductId,
+                        name: currentProduct.name,
+                        price: productPrice,
+                        quantity: 1,
+                        flavor: selectedFlavor || ''
+                    }],
+                    subtotal: productPrice,
+                    shippingPrice: shippingPrice,
+                    grandTotal: grandTotal,
+                    driverName: '',
+                    driverPhone: ''
+                };
+                
+                const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await addDoc(collection(db, "commandes"), orderData);
+                
+                document.getElementById('orderNumber').textContent = orderData.orderNumber;
+                document.getElementById('confirmModal').classList.add('active');
+                
+            } catch (error) {
+                console.error("Erreur de commande:", error);
+                alert('Erreur lors de la commande. Veuillez réessayer.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+            }
+        }
+
+        function generateOrderNumber() {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `PZ${year}${month}${day}${random}`;
+        }
+
+        function loadWilayas(wilayaSelect, communeSelect) {
+            wilayaSelect.innerHTML = '<option value="">Sélectionner une wilaya</option>';
+            Object.keys(wilayasData).sort().forEach(key => {
+                const code = key.split(' - ')[0];
+                const name = key.split(' - ')[1];
+                wilayaSelect.innerHTML += `<option value="${code}">${key}</option>`;
+            });
+        }
+
+        function loadCommunes(wilayaCode, communeSelect) {
+            const key = getWilayaKey(wilayaCode);
+            communeSelect.innerHTML = '<option value="">Sélectionner une commune</option>';
+            
+            if (key && wilayasData[key]) {
+                wilayasData[key].forEach(commune => {
+                    communeSelect.innerHTML += `<option value="${commune}">${commune}</option>`;
+                });
+            }
+        }
+
+        window.addToCartFromPage = function (productId) {
+            let selectedFlavor = null;
+            const activeBtn = document.querySelector('.flavor-selector-btn.active');
+            if (activeBtn) {
+                selectedFlavor = activeBtn.textContent.trim();
+            }
+            window.addToCart(productId, selectedFlavor);
+        };
+    </script>
+</body>
+</html>
