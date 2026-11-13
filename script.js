@@ -958,7 +958,7 @@ async function submitOrderForm() {
     const orderRef = await addDoc(collection(db, "commandes"), commande);
     console.log("✅ Commande sauvegardée avec ID:", orderRef.id);
 
-    // Atomically decrement stock
+    // Atomically decrement stock in database
     await updateProductsQuantities(cart);
 
     closeOrderForm();
@@ -971,6 +971,9 @@ async function submitOrderForm() {
     saveCartToStorage();
     updateCartCount();
     form.reset();
+
+    // Rafraîchir les stocks affichés sur le site immédiatement
+    loadProductsFromFirebase();
 
     if (document.getElementById('shippingPrice')) {
       document.getElementById('shippingPrice').textContent = '0 DA';
@@ -991,35 +994,51 @@ async function submitOrderForm() {
   }
 }
 
-// ========== ⚡ METTRE À JOUR QUANTITÉS AVEC BATCH ==========
+// ========== ⚡ METTRE À JOUR QUANTITÉS EN STOCK ==========
 async function updateProductsQuantities(cartItems) {
-  const results = [];
-  const batch = writeBatch(db);
-  const productRefs = [];
-  
   try {
+    // 1. Agréger les quantités commandées par ID de produit
+    const productQuantities = {};
     for (const item of cartItems) {
-      const productRef = doc(db, "produits", item.id);
+      if (!item || !item.id) continue;
+      const qty = parseInt(item.quantity) || 1;
+      productQuantities[item.id] = (productQuantities[item.id] || 0) + qty;
+    }
+
+    console.log("⚡ Décrémentation du stock pour les produits commandés :", productQuantities);
+
+    // 2. Mettre à jour chaque produit dans Firestore
+    const updates = [];
+    for (const [productId, orderedQty] of Object.entries(productQuantities)) {
+      const productRef = doc(db, "produits", productId);
       const productDoc = await getDoc(productRef);
 
       if (productDoc.exists()) {
-        const currentQuantity = productDoc.data().quantity || 0;
-        const newQuantity = Math.max(0, currentQuantity - item.quantity);
-        
-        batch.update(productRef, { 
-          quantity: newQuantity,
+        const curQty = parseInt(productDoc.data().quantity) || 0;
+        const newQty = Math.max(0, curQty - orderedQty);
+
+        await updateDoc(productRef, {
+          quantity: newQty,
           updatedAt: new Date().toISOString()
         });
-        
-        productRefs.push({ id: item.id, name: item.name, newQty: newQuantity });
+
+        // Mettre à jour également dans la mémoire locale
+        const localProd = products.find(p => p.id === productId);
+        if (localProd) {
+          localProd.quantity = newQty;
+        }
+
+        console.log(`✅ Stock produit ${productId} mis à jour : ${curQty} -> ${newQty}`);
+        updates.push({ id: productId, oldQty: curQty, newQty });
+      } else {
+        console.warn(`⚠️ Produit ${productId} introuvable pour la mise à jour du stock`);
       }
     }
 
-    await batch.commit();
-    return productRefs;
+    return updates;
 
   } catch (error) {
-    console.error("❌ Batch update error:", error);
+    console.error("❌ Erreur lors de la mise à jour des stocks :", error);
     return [];
   }
 }

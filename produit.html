@@ -1621,8 +1621,25 @@
                     driverPhone: ''
                 };
                 
-                const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const { collection, addDoc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                 await addDoc(collection(db, "commandes"), orderData);
+
+                // Décrémenter le stock dans Firestore
+                try {
+                    const productRef = doc(db, "produits", currentProductId);
+                    const freshDoc = await getDoc(productRef);
+                    if (freshDoc.exists()) {
+                        const curQty = parseInt(freshDoc.data().quantity) || 0;
+                        const newQty = Math.max(0, curQty - 1);
+                        await updateDoc(productRef, {
+                            quantity: newQty,
+                            updatedAt: new Date().toISOString()
+                        });
+                        console.log(`✅ Stock produit ${currentProductId} décrémenté : ${curQty} -> ${newQty}`);
+                    }
+                } catch (stockErr) {
+                    console.error("Erreur mise à jour stock produit:", stockErr);
+                }
                 
                 document.getElementById('orderNumber').textContent = orderData.orderNumber;
                 document.getElementById('confirmModal').classList.add('active');
