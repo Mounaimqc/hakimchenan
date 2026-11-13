@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0F">
+  <title>Espace Client | HAKIM CHENAN NUTRITION</title>
+  <link rel="icon" href="logo.png" type="image/x-icon">
+
+  <!-- Fonts: Montserrat for HEADINGS, Inter for BODY -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ========== THEME (EXACT SAME AS STOREFRONT) ========== */
+    :root {
+      --pz-onyx: #0A0A0F;
+      --pz-graphite: #1A1D29;
+      --pz-charcoal: #252836;
+      --pz-slate: #3D4152;
+      --pz-gold: #FFB800;
+      --pz-gold-light: #FFD666;
+      --pz-gold-glow: rgba(255, 184, 0, 0.25);
+      --pz-gold-dark: #CC9200;
+      --pz-energy: #FF4D2E;
+      --pz-energy-light: #FF6B4D;
+      --pz-energy-dark: #E63E1F;
+      --pz-white: #FFFFFF;
+      --pz-cream: #FAF9F6;
+      --pz-light: #F3F4F6;
+      --pz-silver: #9CA3AF;
+      --pz-grey: #4B5563;
+      --pz-dark: #1F2937;
+      --pz-success: #10B981;
+      --pz-danger: #EF4444;
+      --shadow-sm: 0 2px 8px rgba(10, 10, 15, 0.08);
+      --shadow: 0 10px 30px rgba(10, 10, 15, 0.12);
+      --shadow-lg: 0 20px 50px rgba(10, 10, 15, 0.2);
+      --shadow-gold: 0 15px 40px rgba(255, 184, 0, 0.3);
+      --radius: 8px;
+      --radius-lg: 16px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --gradient-gold: linear-gradient(135deg, #FFB800 0%, #CC9200 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--pz-cream);
+      color: var(--pz-dark);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      color: var(--pz-onyx);
+    }
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; outline: none; transition: var(--transition); }
+
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-container {
+      max-width: 1400px; margin: 0 auto; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; font-family: 'Montserrat', sans-serif; flex-shrink: 0; }
+    .logo img { height: 55px; width: auto; border-radius: var(--radius); object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-name { font-size: 1.35rem; font-weight: 900; color: var(--pz-onyx); text-transform: uppercase; letter-spacing: 1px; }
+    .brand-tagline { font-size: 0.7rem; font-weight: 800; color: var(--pz-gold); text-transform: uppercase; letter-spacing: 4px; margin-top: 3px; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: var(--radius);
+      background: var(--pz-white); color: var(--pz-dark);
+      font-weight: 600; font-size: 0.9rem;
+      border: 1.5px solid var(--pz-light); transition: var(--transition);
+    }
+    .header-btn:hover { border-color: var(--pz-gold); color: var(--pz-gold-dark); box-shadow: var(--shadow-sm); }
+    .cart-btn { background: var(--gradient-gold); color: var(--pz-onyx); border-color: var(--pz-gold); font-weight: 800; position: relative; }
+
+    /* Page Container */
+    .portal-container {
+      max-width: 900px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    /* Auth Card */
+    .auth-card {
+      background: var(--pz-white);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--pz-light);
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--pz-light);
+      margin-bottom: 30px;
+      gap: 10px;
+    }
+    .auth-tab-btn {
+      padding: 12px 24px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--pz-grey);
+      background: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transition);
+    }
+    .auth-tab-btn.active {
+      color: var(--pz-onyx);
+      border-color: var(--pz-gold);
+    }
+
+    /* Form */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--pz-onyx);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--pz-light);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+      background: var(--pz-white);
+      color: var(--pz-dark);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--pz-gold);
+      box-shadow: 0 0 0 4px var(--pz-gold-glow);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+    }
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      box-shadow: var(--shadow-gold);
+      width: 100%;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(255, 184, 0, 0.4);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--pz-light);
+      color: var(--pz-dark);
+    }
+    .btn-outline:hover {
+      border-color: var(--pz-gold);
+      color: var(--pz-gold-dark);
+    }
+
+    /* Profile View */
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--pz-light);
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .profile-info h2 {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    .role-badge.reseller-approved {
+      background: rgba(255, 184, 0, 0.2);
+      color: var(--pz-gold-dark);
+      border: 1px solid var(--pz-gold);
+    }
+    .role-badge.reseller-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      border: 1px solid #f59e0b;
+    }
+    .role-badge.customer {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--pz-success);
+      border: 1px solid var(--pz-success);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .info-card {
+      background: var(--pz-cream);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--pz-light);
+    }
+    .info-card-label {
+      font-size: 0.75rem;
+      color: var(--pz-grey);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .info-card-val {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--pz-onyx);
+    }
+
+    /* Orders Section in Account */
+    .orders-section h3 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .order-card {
+      border: 1px solid var(--pz-light);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 12px;
+      background: var(--pz-white);
+      transition: var(--transition);
+    }
+    .order-card:hover {
+      border-color: var(--pz-gold);
+      box-shadow: var(--shadow-sm);
+    }
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .order-card-num {
+      font-weight: 800;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--pz-onyx);
+    }
+    .order-card-total {
+      font-weight: 800;
+      color: var(--pz-gold-dark);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--pz-onyx);
+      color: var(--pz-white);
+      padding: 50px 24px 25px;
+      margin-top: auto;
+      border-top: 4px solid var(--pz-gold);
+    }
+    .footer-bottom {
+      text-align: center; color: var(--pz-silver); font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .auth-card { padding: 24px; }
+      .header-container { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="HAKIM CHENAN NUTRITION Logo">
+        <div class="logo-text">
+          <div class="brand-name">HAKIM CHENAN</div>
+          <div class="brand-tagline">NUTRITION</div>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="index.html" class="header-btn">
+          <i class="fa-solid fa-store"></i> 
+          <span>Boutique</span>
+        </a>
+        <a href="tracking.html" class="header-btn">
+          <i class="fa-solid fa-truck-fast"></i> 
+          <span>Suivi</span>
+        </a>
+        <a href="devenir-revendeur.html" class="header-btn">
+          <i class="fa-solid fa-handshake"></i> 
+          <span>Devenir Revendeur</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="portal-container">
+    <div class="auth-card">
+
+      <!-- View 1: Auth Forms (Login & Register) -->
+      <div id="authSection">
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tabLoginBtn"><i class="fa-solid fa-right-to-bracket"></i> Connexion</button>
+          <button class="auth-tab-btn" id="tabRegisterBtn"><i class="fa-solid fa-user-plus"></i> Créer un Compte Client</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginPhone">Numéro de Téléphone ou Email</label>
+            <input type="text" id="loginPhone" class="form-control" placeholder="0550123456" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Mot de passe</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Entrez votre mot de passe" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+            <i class="fa-solid fa-right-to-bracket"></i> Se Connecter
+          </button>
+          <div style="margin-top:20px; text-align:center;">
+            <p style="font-size:0.9rem; color:var(--pz-grey);">
+              Vous êtes revendeur ? <a href="devenir-revendeur.html" style="color:var(--pz-gold-dark); font-weight:700;">Déposer une candidature revendeur</a>
+            </p>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="regFirstName">Prénom *</label>
+              <input type="text" id="regFirstName" class="form-control" placeholder="Ex: Karim" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regLastName">Nom *</label>
+              <input type="text" id="regLastName" class="form-control" placeholder="Ex: Benali" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="regPhone">Numéro de Téléphone *</label>
+              <input type="tel" id="regPhone" class="form-control" placeholder="0550123456" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regEmail">Email (Optionnel)</label>
+              <input type="email" id="regEmail" class="form-control" placeholder="exemple@mail.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Mot de passe *</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="6 caractères minimum" minlength="6" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="regWilaya">Wilaya *</label>
+              <select id="regWilaya" class="form-control" required>
+                <option value="">Sélectionnez votre wilaya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regCommune">Commune *</label>
+              <select id="regCommune" class="form-control" required>
+                <option value="">Sélectionnez d'abord la wilaya</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="registerSubmitBtn">
+            <i class="fa-solid fa-user-plus"></i> Créer Mon Compte
+          </button>
+        </form>
+      </div>
+
+      <!-- View 2: Customer Profile (Logged In) -->
+      <div id="profileSection" style="display:none;">
+        <div class="profile-header">
+          <div class="profile-info">
+            <h2 id="profName">Chargement...</h2>
+            <div id="profRoleBadge" class="role-badge customer">Client Standard</div>
+          </div>
+          <button class="btn btn-outline" id="logoutBtn" style="width:auto; padding:10px 18px; color:var(--pz-danger);">
+            <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+          </button>
+        </div>
+
+        <!-- Banner for Pending Resellers -->
+        <div id="pendingResellerNotice" style="display:none; background:rgba(245,158,11,0.12); border:1px solid #f59e0b; padding:16px; border-radius:var(--radius); margin-bottom:20px;">
+          <h4 style="color:#d97706; margin-bottom:4px;"><i class="fa-solid fa-clock"></i> Candidature Revendeur en cours d'examen</h4>
+          <p style="font-size:0.85rem; color:var(--pz-dark);">Votre dossier revendeur a bien été enregistré avec le statut <strong>EN ATTENTE</strong>. Les tarifs de gros s'activeront dès approbation par notre administration.</p>
+        </div>
+
+        <!-- Banner for Approved Resellers -->
+        <div id="approvedResellerNotice" style="display:none; background:rgba(255,184,0,0.15); border:1px solid var(--pz-gold); padding:16px; border-radius:var(--radius); margin-bottom:20px;">
+          <h4 style="color:var(--pz-gold-dark); margin-bottom:4px;"><i class="fa-solid fa-badge-check"></i> Compte Revendeur Agréé Actif</h4>
+          <p style="font-size:0.85rem; color:var(--pz-dark);">Félicitations ! Vous bénéficiez des tarifs de gros exclusifs sur tous les produits éligibles. Les prix revendeurs s'appliquent automatiquement dans la boutique et votre panier.</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-card-label">Téléphone</div>
+            <div class="info-card-val" id="profPhone">-</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">Email</div>
+            <div class="info-card-val" id="profEmail">-</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">Wilaya / Commune</div>
+            <div class="info-card-val" id="profLocation">-</div>
+          </div>
+          <div class="info-card" id="profBusinessCard" style="display:none;">
+            <div class="info-card-label">Établissement</div>
+            <div class="info-card-val" id="profBusiness">-</div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div style="display:flex; gap:12px; margin-bottom:30px; flex-wrap:wrap;">
+          <a href="index.html" class="btn btn-primary" style="flex:1;">
+            <i class="fa-solid fa-cart-shopping"></i> Faire mes Achats
+          </a>
+          <a href="devenir-revendeur.html" id="upgradeResellerBtn" class="btn btn-outline" style="flex:1;">
+            <i class="fa-solid fa-handshake"></i> Demander un Accès Revendeur
+          </a>
+        </div>
+
+        <!-- Order history -->
+        <div class="orders-section">
+          <h3><i class="fa-solid fa-receipt"></i> Historique de mes Commandes</h3>
+          <div id="ordersContainer">
+            <p style="text-align:center; color:var(--pz-grey); padding:30px;">Chargement de vos commandes...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>© <span id="currentYear"></span> HAKIM CHENAN NUTRITION. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { 
+      loginCustomer, registerCustomer, getCurrentUser, logout, refreshUserSession 
+    } from './auth-service.js';
+    import { 
+      collection, query, where, getDocs, orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { db } from './firebase-config.js';
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Wilayas data
+    const wilayasData = {
+      "01 - Adrar": ["Adrar", "Aoulef", "Reggane"],
+      "02 - Chlef": ["Chlef", "Boukadir", "Oued Fodda"],
+      "03 - Laghouat": ["Laghouat", "Aflou", "Hassi Delaa"],
+      "04 - Oum El Bouaghi": ["Oum El Bouaghi", "Ain Beida", "Ain M'lila"],
+      "05 - Batna": ["Batna", "Ain Touta", "Barika"],
+      "06 - Béjaïa": ["Béjaïa", "Akbou", "El Kseur"],
+      "07 - Biskra": ["Biskra", "Tolga", "Sidi Okba"],
+      "08 - Béchar": ["Béchar", "Abadla", "Kenadsa"],
+      "09 - Blida": ["Blida", "Boufarik", "Bougara", "Mouzaia"],
+      "10 - Bouira": ["Bouira", "Lakhdaria", "Sour El Ghozlane"],
+      "11 - Tamanrasset": ["Tamanrasset", "In Guezzam"],
+      "12 - Tébessa": ["Tébessa", "Bir El Ater", "Cheria"],
+      "13 - Tlemcen": ["Tlemcen", "Maghnia", "Remchi"],
+      "14 - Tiaret": ["Tiaret", "Sougueur", "Frenda"],
+      "15 - Tizi Ouzou": ["Tizi Ouzou", "Azeffoun", "Draa El Mizan"],
+      "16 - Alger": ["Alger Centre", "Bab El Oued", "Kouba", "Dar El Beida", "Hussein Dey", "Bouzareah", "Birkhadem"],
+      "17 - Djelfa": ["Djelfa", "Messaad", "Ain Oussara"],
+      "18 - Jijel": ["Jijel", "Taher", "El Milia"],
+      "19 - Sétif": ["Sétif", "El Eulma", "Ain Oulmene"],
+      "20 - Saïda": ["Saïda", "Youb"],
+      "21 - Skikda": ["Skikda", "Collo", "Azzaba"],
+      "22 - Sidi Bel Abbès": ["Sidi Bel Abbès", "Telagh", "Sfisef"],
+      "23 - Annaba": ["Annaba", "El Bouni", "El Hadjar"],
+      "24 - Guelma": ["Guelma", "Oued Zenati", "Bouchegouf"],
+      "25 - Constantine": ["Constantine", "El Khroub", "Hamma Bouziane"],
+      "26 - Médéa": ["Médéa", "Berrouaghia", "Ksar El Boukhari"],
+      "27 - Mostaganem": ["Mostaganem", "Ain Tedles", "Sidi Ali"],
+      "28 - M'Sila": ["M'Sila", "Bou Saada", "Sidi Aissa"],
+      "29 - Mascara": ["Mascara", "Mohammadia", "Sig"],
+      "30 - Ouargla": ["Ouargla", "Hassi Messaoud", "Touggourt"],
+      "31 - Oran": ["Oran", "Es Senia", "Bir El Djir", "Arzew"],
+      "32 - El Bayadh": ["El Bayadh", "Bougtoub"],
+      "33 - Illizi": ["Illizi", "Djanet"],
+      "34 - Bordj Bou Arréridj": ["Bordj Bou Arréridj", "Ras El Oued"],
+      "35 - Boumerdès": ["Boumerdès", "Dellys", "Bordj Menaiel"],
+      "36 - El Tarf": ["El Tarf", "El Kala"],
+      "37 - Tindouf": ["Tindouf"],
+      "38 - Tissemsilt": ["Tissemsilt", "Theniet El Had"],
+      "39 - El Oued": ["El Oued", "Guemar"],
+      "40 - Khenchela": ["Khenchela", "Kais"],
+      "41 - Souk Ahras": ["Souk Ahras", "Sedrata"],
+      "42 - Tipaza": ["Tipaza", "Cherchell", "Kolea", "Bou Ismail"],
+      "43 - Mila": ["Mila", "Chelghoum Laid"],
+      "44 - Aïn Defla": ["Aïn Defla", "Khemis Miliana"],
+      "45 - Naâma": ["Naâma", "Mecheria"],
+      "46 - Aïn Témouchent": ["Aïn Témouchent", "Beni Saf"],
+      "47 - Ghardaïa": ["Ghardaïa", "Metlili"],
+      "48 - Relizane": ["Relizane", "Oued Rhiou"],
+      "49 - Timimoun": ["Timimoun"],
+      "50 - Bordj Badji Mokhtar": ["Bordj Badji Mokhtar"],
+      "51 - Ouled Djellal": ["Ouled Djellal"],
+      "52 - Béni Abbès": ["Béni Abbès"],
+      "53 - In Salah": ["In Salah"],
+      "54 - In Guezzam": ["In Guezzam"],
+      "55 - Touggourt": ["Touggourt"],
+      "56 - Djanet": ["Djanet"],
+      "57 - El M'Ghair": ["El M'Ghair"],
+      "58 - El Meniaa": ["El Meniaa"]
+    };
+
+    // Populate registration Wilayas
+    const regWilayaSel = document.getElementById('regWilaya');
+    const regCommuneSel = document.getElementById('regCommune');
+
+    Object.keys(wilayasData).sort().forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w;
+      opt.textContent = w;
+      regWilayaSel.appendChild(opt);
+    });
+
+    regWilayaSel.addEventListener('change', () => {
+      const selected = regWilayaSel.value;
+      regCommuneSel.innerHTML = '<option value="">Sélectionnez la commune</option>';
+      if (selected && wilayasData[selected]) {
+        wilayasData[selected].forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          regCommuneSel.appendChild(opt);
+        });
+      }
+    });
+
+    // Tab Switchers
+    const tabLogin = document.getElementById('tabLoginBtn');
+    const tabRegister = document.getElementById('tabRegisterBtn');
+    const formLogin = document.getElementById('loginForm');
+    const formRegister = document.getElementById('registerForm');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      formLogin.style.display = 'block';
+      formRegister.style.display = 'none';
+    });
+
+    tabRegister.addEventListener('click', () => {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      formLogin.style.display = 'none';
+      formRegister.style.display = 'block';
+    });
+
+    // Check existing session
+    async function initView() {
+      const user = await refreshUserSession() || getCurrentUser();
+      if (user && user.id) {
+        showProfile(user);
+      } else {
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('profileSection').style.display = 'none';
+      }
+    }
+
+    // Display Profile
+    function showProfile(user) {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('profileSection').style.display = 'block';
+
+      document.getElementById('profName').textContent = user.fullName || `${user.firstName} ${user.lastName}`;
+      document.getElementById('profPhone').textContent = user.phone || '—';
+      document.getElementById('profEmail').textContent = user.email || '—';
+      document.getElementById('profLocation').textContent = `${user.wilaya || ''} ${user.commune ? '• ' + user.commune : ''}`;
+
+      const badge = document.getElementById('profRoleBadge');
+      const pendingNotice = document.getElementById('pendingResellerNotice');
+      const approvedNotice = document.getElementById('approvedResellerNotice');
+      const upgradeBtn = document.getElementById('upgradeResellerBtn');
+      const bCard = document.getElementById('profBusinessCard');
+
+      if (user.role === 'reseller') {
+        if (user.status === 'approved') {
+          badge.className = 'role-badge reseller-approved';
+          badge.innerHTML = '<i class="fa-solid fa-check-circle"></i> Revendeur Agréé';
+          approvedNotice.style.display = 'block';
+          pendingNotice.style.display = 'none';
+          upgradeBtn.style.display = 'none';
+        } else if (user.status === 'pending') {
+          badge.className = 'role-badge reseller-pending';
+          badge.innerHTML = '<i class="fa-solid fa-clock"></i> Candidature Revendeur en Attente';
+          pendingNotice.style.display = 'block';
+          approvedNotice.style.display = 'none';
+          upgradeBtn.style.display = 'none';
+        } else {
+          badge.className = 'role-badge customer';
+          badge.textContent = `Compte ${user.status}`;
+        }
+
+        if (user.businessName) {
+          bCard.style.display = 'block';
+          document.getElementById('profBusiness').textContent = user.businessName;
+        }
+      } else {
+        badge.className = 'role-badge customer';
+        badge.innerHTML = '<i class="fa-solid fa-user"></i> Client Standard';
+        pendingNotice.style.display = 'none';
+        approvedNotice.style.display = 'none';
+        upgradeBtn.style.display = 'inline-flex';
+      }
+
+      loadCustomerOrders(user);
+    }
+
+    // Load Customer Orders
+    async function loadCustomerOrders(user) {
+      const container = document.getElementById('ordersContainer');
+      try {
+        const q = query(collection(db, "commandes"), where("phone1", "==", user.phone), orderBy("date", "desc"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          container.innerHTML = '<p style="text-align:center; color:var(--pz-grey); padding:30px;">Aucune commande enregistrée pour ce numéro.</p>';
+          return;
+        }
+
+        container.innerHTML = snap.docs.map(docSnap => {
+          const cmd = docSnap.data();
+          const dateStr = cmd.date ? new Date(cmd.date).toLocaleDateString('fr-FR') : '—';
+          return `
+            <div class="order-card">
+              <div class="order-card-header">
+                <div>
+                  <span class="order-card-num">#${cmd.orderNumber}</span>
+                  <span style="font-size:0.8rem; color:var(--pz-grey); margin-left:10px;">${dateStr}</span>
+                </div>
+                <div class="order-card-total">${(cmd.grandTotal || 0).toFixed(2)} DA</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.85rem;">
+                <div>
+                  <span style="color:var(--pz-grey);">Livraison :</span> <strong>${cmd.orderType === 'domicile' ? 'À Domicile' : 'Stop Desk'}</strong> (${cmd.wilaya})
+                </div>
+                <div>
+                  <a href="tracking.html?order=${cmd.orderNumber}" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                    <i class="fa-solid fa-truck-fast"></i> Suivre cette commande
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error("Orders error:", err);
+        container.innerHTML = '<p style="text-align:center; color:var(--pz-grey); padding:20px;">Historique disponible via la section Suivi.</p>';
+      }
+    }
+
+    // Handle Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginSubmitBtn');
+      const original = btn.innerHTML;
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Connexion...';
+
+        const phone = document.getElementById('loginPhone').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+
+        const user = await loginCustomer(phone, pass);
+        showProfile(user);
+
+      } catch (err) {
+        alert("Erreur de connexion : " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    });
+
+    // Handle Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('registerSubmitBtn');
+      const original = btn.innerHTML;
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Création du compte...';
+
+        const firstName = document.getElementById('regFirstName').value.trim();
+        const lastName = document.getElementById('regLastName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const wilaya = regWilayaSel.value;
+        const commune = regCommuneSel.value;
+
+        const user = await registerCustomer({
+          firstName, lastName, phone, email, password, wilaya, commune
+        });
+
+        showProfile(user);
+
+      } catch (err) {
+        alert("Erreur d'inscription : " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    });
+
+    // Handle Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      logout();
+      window.location.reload();
+    });
+
+    // Init
+    initView();
+  </script>
+</body>
+</html>

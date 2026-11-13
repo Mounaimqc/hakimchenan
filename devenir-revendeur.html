@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0F">
+  <title>Devenir Revendeur | HAKIM CHENAN NUTRITION</title>
+  <link rel="icon" href="logo.png" type="image/x-icon">
+
+  <!-- Fonts: Montserrat for HEADINGS, Inter for BODY -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ========== THEME (EXACT SAME AS STOREFRONT) ========== */
+    :root {
+      --pz-onyx: #0A0A0F;
+      --pz-graphite: #1A1D29;
+      --pz-charcoal: #252836;
+      --pz-slate: #3D4152;
+      --pz-gold: #FFB800;
+      --pz-gold-light: #FFD666;
+      --pz-gold-glow: rgba(255, 184, 0, 0.25);
+      --pz-gold-dark: #CC9200;
+      --pz-energy: #FF4D2E;
+      --pz-energy-light: #FF6B4D;
+      --pz-energy-dark: #E63E1F;
+      --pz-energy-glow: rgba(255, 77, 46, 0.3);
+      --pz-white: #FFFFFF;
+      --pz-cream: #FAF9F6;
+      --pz-light: #F3F4F6;
+      --pz-silver: #9CA3AF;
+      --pz-grey: #4B5563;
+      --pz-dark: #1F2937;
+      --pz-success: #10B981;
+      --pz-success-light: rgba(16, 185, 129, 0.15);
+      --pz-danger: #EF4444;
+      --pz-info: #3B82F6;
+      --shadow-sm: 0 2px 8px rgba(10, 10, 15, 0.08);
+      --shadow: 0 10px 30px rgba(10, 10, 15, 0.12);
+      --shadow-lg: 0 20px 50px rgba(10, 10, 15, 0.2);
+      --shadow-gold: 0 15px 40px rgba(255, 184, 0, 0.3);
+      --radius: 8px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --gradient-gold: linear-gradient(135deg, #FFB800 0%, #CC9200 100%);
+      --gradient-energy: linear-gradient(135deg, #FF4D2E 0%, #E63E1F 100%);
+      --gradient-dark: linear-gradient(180deg, #0A0A0F 0%, #1A1D29 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--pz-cream);
+      color: var(--pz-dark);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      color: var(--pz-onyx);
+    }
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; outline: none; transition: var(--transition); }
+
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-container {
+      max-width: 1400px; margin: 0 auto; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; font-family: 'Montserrat', sans-serif; flex-shrink: 0; }
+    .logo img { height: 55px; width: auto; border-radius: var(--radius); object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-name { font-size: 1.35rem; font-weight: 900; color: var(--pz-onyx); text-transform: uppercase; letter-spacing: 1px; }
+    .brand-tagline { font-size: 0.7rem; font-weight: 800; color: var(--pz-gold); text-transform: uppercase; letter-spacing: 4px; margin-top: 3px; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: var(--radius);
+      background: var(--pz-white); color: var(--pz-dark);
+      font-weight: 600; font-size: 0.9rem;
+      border: 1.5px solid var(--pz-light); transition: var(--transition);
+    }
+    .header-btn:hover { border-color: var(--pz-gold); color: var(--pz-gold-dark); box-shadow: var(--shadow-sm); }
+    .cart-btn { background: var(--gradient-gold); color: var(--pz-onyx); border-color: var(--pz-gold); font-weight: 800; position: relative; }
+
+    /* Hero Banner */
+    .reseller-hero {
+      background: var(--pz-onyx);
+      color: var(--pz-white);
+      padding: 70px 24px 60px;
+      text-align: center;
+      position: relative;
+      border-bottom: 4px solid var(--pz-gold);
+    }
+    .reseller-hero h1 {
+      font-size: 2.8rem;
+      color: var(--pz-white);
+      margin-bottom: 15px;
+      letter-spacing: -0.5px;
+    }
+    .gold-text { color: var(--pz-gold); }
+    .reseller-hero p {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 1.15rem;
+      color: var(--pz-silver);
+    }
+    .reseller-arabic-notice {
+      margin-top: 15px;
+      font-size: 1.1rem;
+      color: var(--pz-gold-light);
+      direction: rtl;
+    }
+
+    /* Container */
+    .page-container {
+      max-width: 950px;
+      margin: -40px auto 60px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Cards */
+    .reseller-card {
+      background: var(--pz-white);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--pz-light);
+    }
+
+    /* Steps */
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 35px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--pz-light);
+    }
+    .step-box {
+      background: var(--pz-cream);
+      padding: 18px;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--pz-gold);
+      text-align: left;
+    }
+    .step-num {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--pz-gold-dark);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .step-box h4 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: var(--pz-onyx);
+    }
+    .step-box p {
+      font-size: 0.85rem;
+      color: var(--pz-grey);
+      line-height: 1.4;
+    }
+
+    /* Form */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--pz-onyx);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--pz-light);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+      background: var(--pz-white);
+      color: var(--pz-dark);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--pz-gold);
+      box-shadow: 0 0 0 4px var(--pz-gold-glow);
+    }
+    textarea.form-control {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .form-hint {
+      font-size: 0.78rem;
+      color: var(--pz-grey);
+      margin-top: 5px;
+      display: block;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(255, 184, 0, 0.12);
+      border: 1px solid var(--pz-gold);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .alert-banner i {
+      font-size: 1.4rem;
+      color: var(--pz-gold-dark);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .alert-banner-text h5 {
+      font-size: 0.95rem;
+      color: var(--pz-onyx);
+      margin-bottom: 4px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .alert-banner-text p {
+      font-size: 0.85rem;
+      color: var(--pz-dark);
+      line-height: 1.4;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 30px;
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+    }
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      box-shadow: var(--shadow-gold);
+      width: 100%;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(255, 184, 0, 0.4);
+    }
+
+    /* Status Result Card */
+    .status-card {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .status-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 184, 0, 0.15);
+      border: 2px solid var(--pz-gold);
+      color: var(--pz-gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 20px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: #f59e0b;
+      color: #fff;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--pz-onyx);
+      color: var(--pz-white);
+      padding: 60px 24px 30px;
+      margin-top: auto;
+      border-top: 4px solid var(--pz-gold);
+    }
+    .footer-container {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 40px;
+    }
+    .footer-section h3 {
+      font-size: 1.1rem; margin-bottom: 20px; color: var(--pz-white);
+    }
+    .footer-desc { font-size: 0.9rem; color: var(--pz-silver); line-height: 1.6; }
+    .contact-links { display: flex; flex-direction: column; gap: 10px; }
+    .contact-link { display: flex; align-items: center; gap: 10px; color: var(--pz-silver); font-size: 0.9rem; }
+    .contact-link i { color: var(--pz-gold); }
+    .contact-link:hover { color: var(--pz-gold); }
+    .footer-bottom {
+      max-width: 1400px; margin: 40px auto 0; padding-top: 20px;
+      border-top: 1px solid var(--pz-charcoal); text-align: center;
+      color: var(--pz-silver); font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .reseller-hero h1 { font-size: 2rem; }
+      .steps-row { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .reseller-card { padding: 24px; }
+      .header-container { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="HAKIM CHENAN NUTRITION Logo">
+        <div class="logo-text">
+          <div class="brand-name">HAKIM CHENAN</div>
+          <div class="brand-tagline">NUTRITION</div>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="index.html" class="header-btn">
+          <i class="fa-solid fa-store"></i> 
+          <span>Boutique</span>
+        </a>
+        <a href="tracking.html" class="header-btn">
+          <i class="fa-solid fa-truck-fast"></i> 
+          <span>Suivi</span>
+        </a>
+        <a href="compte.html" class="header-btn" id="accountNavBtn">
+          <i class="fa-solid fa-user"></i> 
+          <span id="accountNavText">Mon Compte</span>
+        </a>
+        <a href="couverture.html" class="header-btn">
+          <i class="fa-solid fa-map-location-dot"></i> 
+          <span>Couverture</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Reseller Hero -->
+  <section class="reseller-hero">
+    <h1>PROGRAMME <span class="gold-text">REVENDEURS</span> OFFICIEL</h1>
+    <p>Rejoignez le réseau exclusif des distributeurs agréés HAKIM CHENAN NUTRITION à travers toute l'Algérie et bénéficiez de tarifs de gros hautement compétitifs.</p>
+    <p class="reseller-arabic-notice">انضم إلى شبكة الموزعين المعتمدين لـ HAKIM CHENAN NUTRITION واستفد من أسعار الجملة الحصرية فور قبول طلبك.</p>
+  </section>
+
+  <!-- Page Content -->
+  <div class="page-container">
+    <div class="reseller-card">
+
+      <!-- How it works -->
+      <div class="steps-row">
+        <div class="step-box">
+          <span class="step-num">Étape 1</span>
+          <h4>Inscription & Dossier</h4>
+          <p>Remplissez le formulaire ci-dessous avec les coordonnées de votre activité commerciale.</p>
+        </div>
+        <div class="step-box">
+          <span class="step-num">Étape 2</span>
+          <h4>Validation Admin (24h)</h4>
+          <p>Votre dossier passe en statut <strong>EN ATTENTE</strong> et est vérifié par notre direction commerciale.</p>
+        </div>
+        <div class="step-box">
+          <span class="step-num">Étape 3</span>
+          <h4>Prix de Gros Débloqués</h4>
+          <p>Dès approbation, les tarifs revendeurs s'affichent automatiquement à chaque connexion.</p>
+        </div>
+      </div>
+
+      <!-- Warning info -->
+      <div class="alert-banner">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <div class="alert-banner-text">
+          <h5>RÈGLE DE SÉCURITÉ DES PRIX</h5>
+          <p>Conformément à notre politique, <strong>les tarifs de gros ne sont pas visibles tant que votre candidature n'a pas été validée par un administrateur</strong>. Une fois approuvé, votre compte bénéficiera automatiquement des prix revendeurs.</p>
+        </div>
+      </div>
+
+      <!-- Application Form -->
+      <form id="resellerForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fullName">Nom Complet (Prénom & Nom) *</label>
+            <input type="text" id="fullName" class="form-control" placeholder="Ex: Mohamed Benali" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="phone">Numéro de Téléphone *</label>
+            <input type="tel" id="phone" class="form-control" placeholder="0550123456" required>
+            <span class="form-hint">Servira d'identifiant de connexion</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">Adresse Email</label>
+            <input type="email" id="email" class="form-control" placeholder="contact@commerce.dz (Optionnel)">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Mot de passe du compte *</label>
+            <input type="password" id="password" class="form-control" placeholder="6 caractères minimum" minlength="6" required>
+            <span class="form-hint">Pour accéder à votre espace revendeur</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="wilaya">Wilaya *</label>
+            <select id="wilaya" class="form-control" required>
+              <option value="">Sélectionnez votre wilaya</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="commune">Commune *</label>
+            <select id="commune" class="form-control" required>
+              <option value="">Sélectionnez d'abord la wilaya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="businessName">Nom de l'Établissement / Magasin</label>
+            <input type="text" id="businessName" class="form-control" placeholder="Ex: Gym Pro Nutrition / Fitness Club">
+            <span class="form-hint">Magasin de suppléments, salle de sport, coach, parapharmacie...</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="businessAddress">Adresse Commerciale</label>
+            <input type="text" id="businessAddress" class="form-control" placeholder="Adresse du local / point de vente">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="notes">Informations Complémentaires / Volume Prévisionnel</label>
+          <textarea id="notes" class="form-control" placeholder="Décrivez brièvement votre activité, vos besoins en volume ou toute précision utile..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fa-solid fa-paper-plane"></i> Envoyer ma Candidature Revendeur
+        </button>
+
+        <p style="text-align:center; font-size:0.85rem; color:var(--pz-grey); margin-top:16px;">
+          Déjà revendeur agréé ? <a href="compte.html" style="color:var(--pz-gold-dark); font-weight:700;">Connectez-vous à votre compte</a>
+        </p>
+      </form>
+
+      <!-- Success / Status Display -->
+      <div id="statusContainer" class="status-card">
+        <div class="status-icon"><i class="fa-solid fa-clock"></i></div>
+        <span class="status-badge">Statut : En Attente (PENDING)</span>
+        <h2 style="margin-bottom:12px;">Candidature Enregistrée avec Succès !</h2>
+        <p style="color:var(--pz-grey); max-width:600px; margin:0 auto 24px;">
+          Votre demande de compte revendeur a été transmise à notre service commercial. Elle sera examinée dans un délai de 24 heures.
+        </p>
+        <div style="background:var(--pz-cream); padding:20px; border-radius:var(--radius); max-width:500px; margin:0 auto 25px; text-align:left;">
+          <p style="font-size:0.9rem; margin-bottom:8px;"><strong>Candidat :</strong> <span id="resCandidate"></span></p>
+          <p style="font-size:0.9rem; margin-bottom:8px;"><strong>Téléphone :</strong> <span id="resPhone"></span></p>
+          <p style="font-size:0.9rem; margin-bottom:8px;"><strong>Localisation :</strong> <span id="resLocation"></span></p>
+          <p style="font-size:0.85rem; color:var(--pz-energy); margin-top:12px;">
+            <i class="fa-solid fa-lock"></i> Tant que votre compte n'est pas validé par l'administrateur, les prix affichés en boutique restent les prix de détail publics.
+          </p>
+        </div>
+        <a href="index.html" class="btn btn-primary" style="display:inline-flex; width:auto;">
+          <i class="fa-solid fa-store"></i> Retourner à la Boutique
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3><span class="gold-text">HAKIM CHENAN</span> NUTRITION</h3>
+        <p class="footer-desc">Fournisseur officiel des athlètes et passionnés de musculation en Algérie. Produits originaux certifiés.</p>
+      </div>
+      <div class="footer-section">
+        <h3>QG COMMANDEMENT</h3>
+        <div class="contact-links">
+          <a href="tel:+213782945288" class="contact-link"><i class="fa-solid fa-phone"></i><span>0782945288</span></a>
+          <a href="mailto:contact@hakimchenan.dz" class="contact-link"><i class="fa-solid fa-envelope"></i><span>contact@hakimchenan.dz</span></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h3>ACCÈS REVENDEURS</h3>
+        <p class="footer-desc">Commandes de gros, tarifs préférentiels et suivi dédié pour les professionnels du sport.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <span id="currentYear"></span> HAKIM CHENAN NUTRITION. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { registerResellerApplication, getCurrentUser } from './auth-service.js';
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Wilayas data
+    const wilayasData = {
+      "01 - Adrar": ["Adrar", "Aoulef", "Charouine", "Reggane", "Tamentit", "Tsabit", "Zaouiet Kounta"],
+      "02 - Chlef": ["Chlef", "Abou", "Ain Merane", "Boukadir", "El Karimia", "Oued Fodda", "Tadjena", "Zeboudja"],
+      "03 - Laghouat": ["Laghouat", "Ain Madhi", "Brida", "El Ghicha", "Hassi Delaa", "Ksar El Hirane", "Sidi Makhlouf"],
+      "04 - Oum El Bouaghi": ["Oum El Bouaghi", "Ain Beida", "Ain M'lila", "Behir Chergui", "El Amiria", "Sigus", "Souk Naamane"],
+      "05 - Batna": ["Batna", "Ain Touta", "Arris", "Barika", "Bouzina", "El Madher", "Fesdis", "Ghassira", "Merouana", "N'Gaous", "Ras El Aioun", "Tazoult", "Timgad"],
+      "06 - Béjaïa": ["Béjaïa", "Akbou", "Amizour", "Chemini", "Darguina", "El Kseur", "Ifnayen", "Kherrata", "Seddouk", "Tichy", "Tifra", "Timezrit"],
+      "07 - Biskra": ["Biskra", "Ain Naga", "Bordj Ben Azzouz", "Chetma", "El Kantara", "El Outaya", "M'Chouneche", "Ouled Djellal", "Sidi Okba", "Zeribet El Oued"],
+      "08 - Béchar": ["Béchar", "Abadla", "Beni Ounif", "Kenadsa", "Lahmar", "Mechraa Houari Boumedienne", "Taghit"],
+      "09 - Blida": ["Blida", "Boufarik", "Bougara", "Chebli", "Chiffa", "El Affroun", "Mouzaia", "Oued Alleug", "Souhane"],
+      "10 - Bouira": ["Bouira", "Ain Bessem", "Bechloul", "Bordj Okhriss", "El Adjiba", "Haizer", "Lakhdaria", "M'Chedallah", "Sour El Ghozlane"],
+      "11 - Tamanrasset": ["Tamanrasset", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Amguel", "In Ghar", "In Salah", "Tazrouk"],
+      "12 - Tébessa": ["Tébessa", "Ain Zerga", "Bir El Ater", "Cheria", "El Aouinet", "El Ogla", "Morsott", "Negrine", "Ouenza", "Stah Guentis"],
+      "13 - Tlemcen": ["Tlemcen", "Ain Fezza", "Ain Youcef", "Beni Bahdel", "Beni Snous", "Bensekrane", "El Aricha", "El Fehoul", "Ghazaouet", "Hennaya", "Maghnia", "Mansourah", "Nedroma", "Remchi", "Sebdou", "Zenata"],
+      "14 - Tiaret": ["Tiaret", "Ain Deheb", "Ain Kermes", "Djillali Ben Amar", "Frenda", "Hamadia", "Ksar Chellala", "Mahdia", "Mechraa Safa", "Medroussa", "Oued Lili", "Rahouia", "Sougueur"],
+      "15 - Tizi Ouzou": ["Tizi Ouzou", "Ain El Hammam", "Akbil", "Azeffoun", "Boghni", "Boudjima", "Bouira", "Draa El Mizan", "Iferhounene", "Larbaa Nath Irathen", "Maatkas", "Makouda", "Mizrana", "Ouacif", "Ouadhia", "Tigzirt", "Timizart"],
+      "16 - Alger": ["Alger Centre", "Bab El Oued", "Birkhadem", "Bouzareah", "Dar El Beida", "El Biar", "Hussein Dey", "Kouba", "Mohamed Belouizdad", "Oued Koriche", "Sidi M'Hamed"],
+      "17 - Djelfa": ["Djelfa", "Ain Chouhada", "Ain El Ibel", "Birine", "Charef", "El Idrissia", "Faidh El Botma", "Guernini", "Hassi Bahbah", "Hassi El Euch", "Messaad", "Sidi Ladjel"],
+      "18 - Jijel": ["Jijel", "Ain Taya", "Boucif Ouled Askeur", "Chahna", "El Ancer", "El Milia", "Emir Abdelkader", "Ghebala", "Kaous", "Ouled Rabah", "Taher", "Texenna", "Ziama Mansouriah"],
+      "19 - Sétif": ["Sétif", "Ain Abessa", "Ain Arnat", "Ain Azel", "Ain El Kebira", "Ain Oulmene", "Amoucha", "Babor", "Bazer Sakhra", "Beidha Bordj", "Beni Aziz", "Bir El Arch", "Bouandas", "Bouga", "Djemila", "El Eulma", "Guenzet", "Guidjel", "Hammam Guergour", "Harbil", "Maaouia", "Maoklane", "Salah Bey", "Serdj El Ghoul", "Tachouda", "Tamazirt", "Tella", "Zerdaza"],
+      "20 - Saïda": ["Saïda", "Ain El Hadjar", "Ain Sekhouna", "Doui Thabet", "El Hassasna", "Hounet", "Maamora", "Moulay Larbi", "Ouled Brahim", "Ouled Khaled", "Youb"],
+      "21 - Skikda": ["Skikda", "Ain Kechra", "Azzaba", "Ben Azzouz", "Collo", "El Harrouch", "Oued Zehour", "Ramdane Djamel", "Sidi Mezghiche", "Tamalous", "Zitouna"],
+      "22 - Sidi Bel Abbès": ["Sidi Bel Abbès", "Ain Adden", "Ain Thrid", "Ben Badis", "Marhoum", "Mérine", "Mostefa Ben Brahim", "Moulay Slissen", "Oued Taourira", "Ras El Ma", "Sfisef", "Tafraoui", "Telagh", "Ténira"],
+      "23 - Annaba": ["Annaba", "Ain Berda", "Berrahal", "Chorfa", "El Bouni", "El Hadjar", "Oued El Aneb", "Seraidi", "Treat"],
+      "24 - Guelma": ["Guelma", "Ain Ben Beida", "Ain Reggada", "Bou Hamdane", "Bouati Mahmoud", "Dahoua", "El Fedjoudj Boughrara", "Hammam Debagh", "Hammam N'Bails", "Heliopolis", "Khezaras", "Oued Zenati", "Ras El Agba", "Salaoua Announa", "Zemmoura"],
+      "25 - Constantine": ["Constantine", "Ain Smara", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Ibn Ziad", "Messaouda", "Zighoud Youcef"],
+      "26 - Médéa": ["Médéa", "Ain Boucif", "Ain Ouksir", "Aziz", "Berrouaghia", "Chahbounia", "Chelif", "Deux Bassins", "Djouab", "El Azizia", "El Omaria", "Guelb El Kebir", "Ksar El Boukhari", "Mihoub", "Oued Harbil", "Ouled Deid", "Ouled Hellal", "Ouled Maaref", "Seghouane", "Si Mahdjoub", "Souagui", "Tablat"],
+      "27 - Mostaganem": ["Mostaganem", "Ain Tedles", "Ain Sidi Cherif", "Bouguirat", "Hassi Mamèche", "Kheir Eddine", "Mesra", "Ouled Boughalem", "Ouled Malah", "Sidi Ali", "Sidi Lakhdar", "Sirat", "Stidia", "Tazgait"],
+      "28 - M'Sila": ["M'Sila", "Ain El Melh", "Ben Srour", "Bou Saada", "Chellal", "Djebel Messaad", "El Hamel", "El Houamed", "Hammam Dhalaâ", "Khoubana", "Maadid", "Magra", "Medjedel", "Ouanougha", "Ouled Derradj", "Ouled Sidi Brahim", "Sidi Aissa", "Sidi Hadjeres", "Sidi M'hamed", "Souamaa", "Tarmount", "Zarzit"],
+      "29 - Mascara": ["Mascara", "Ain Farès", "Ain Fekroun", "Ain Fekan", "Aouf", "El Bordj", "El Gaada", "El Ghomri", "El Keurt", "El Menaouer", "Froha", "Ghriss", "Hachem", "Hacine", "Maoussa", "Mohammadia", "Mocta Douz", "Nesmoth", "Oggaz", "Oued El Abtal", "Oued Taria", "Ras Ain Amirouche", "Sidi Abdeldjebar", "Sidi Kada", "Sidi Zahar", "Tighennif", "Tizi", "Zahana"],
+      "30 - Ouargla": ["Ouargla", "Ain Beida", "El Allia", "El Hadjira", "El Hajeb", "Hassi Ben Abdellah", "Hassi Messaoud", "N'Goussa", "Rouissat", "Sidi Khouiled", "Taibet", "Tebesbest", "Touggourt", "Zaouia El Abidia"],
+      "31 - Oran": ["Oran", "Arzew", "Bethioua", "Bir El Djir", "Es Senia", "Gdyel", "Hassi Bounif", "Marsat El Hadjadj", "Mers El Kebir", "Misserghin", "Oued Tlelat", "Sidi Ben Yebka", "Sidi Chami"],
+      "32 - El Bayadh": ["El Bayadh", "Ain El Orak", "Bougtoub", "Brézina", "Chellala", "El Abiodh Sidi Cheikh", "El Bnoud", "Ghassoul", "Kef El Ahmar", "Rogassa", "Sidi Slimane", "Stitten"],
+      "33 - Illizi": ["Illizi", "Bordj Omar Driss", "Djanet", "Debdeb", "El Borma", "In Amenas", "In Guezzam", "In Salah", "Tin Zaouatine"],
+      "34 - Bordj Bou Arréridj": ["Bordj Bou Arréridj", "Ain Taghrout", "Belimour", "Bir Kasdali", "Bordj Ghdir", "Bordj Zemmoura", "Colla", "El Achir", "El Anser", "El Hamadia", "El Main", "El M'hir", "Ghilassa", "Haraza", "Hasnaoua", "Ksour", "Mansourah", "Medjana", "Ouled Brahem", "Ouled Dahmane", "Ouled Sidi Brahim", "Ras El Oued", "Righa", "Taglait", "Teniet En Nasr"],
+      "35 - Boumerdès": ["Boumerdès", "Ammal", "Baghlia", "Bordj Menaiel", "Boudouaou", "Boudouaou El Bahri", "Chabet El Ameur", "Dellys", "Isser", "Khemis El Khechna", "Legata", "Naciria", "Ouled Aissa", "Ouled Fayet", "Si Mustapha", "Souk El Had", "Thénia"],
+      "36 - El Tarf": ["El Tarf", "Ain Kercha", "Ben M'Hidi", "Besbes", "Bouhadjar", "Boutheldja", "Dréan", "El Kala", "Lac des Oiseaux", "Souarekh"],
+      "37 - Tindouf": ["Tindouf", "Aouinet Bel Egrâ", "Fenoughil", "Oum El Assel"],
+      "38 - Tissemsilt": ["Tissemsilt", "Ammari", "Belaassel Bouzegza", "Beni Chaib", "Boucaid", "Bouhatem", "Boukhanafis", "Khemisti", "Lazharia", "Layoune", "Maacem", "Sidi Abed", "Sidi Boutouchent", "Sidi Lantri", "Tamalaht", "Theniet El Had"],
+      "39 - El Oued": ["El Oued", "Bayadha", "Debila", "El Ogla", "Guemar", "Hassi Khelifa", "Magrane", "Mih Ouensa", "Oued Souf", "Reguiba", "Robbah", "Taleb Larbi", "Trifaoui"],
+      "40 - Khenchela": ["Khenchela", "Ain Touila", "Babar", "Bouhmama", "Chechar", "El Hamma", "El Mahmal", "El Mahres", "El Ouenza", "Hammam Essalihine", "Kais", "Ouled Rechache", "Remila", "Yabous"],
+      "41 - Souk Ahras": ["Souk Ahras", "Ain Zana", "Bir Bouhouche", "Heddada", "Khedara", "M'Daourouch", "Mechroha", "Merahna", "Ouled Driss", "Oum El Adhaïm", "Sedrata", "Taoura", "Zouabi"],
+      "42 - Tipaza": ["Tipaza", "Ahmar El Ain", "Bou Ismail", "Cherchell", "Damous", "Fouka", "Gouraya", "Hadjout", "Koléa", "Menaceur", "Nador", "Sidi Amar", "Sidi Ghiles", "Sidi Rached", "Sidi Semiane", "Tipasa"],
+      "43 - Mila": ["Mila", "Ain Beida", "Ain Mellouk", "Chelghoum Laid", "El Ayadi Barbes", "El Barka", "El Eulma", "Ferdjioua", "Grarem Gouga", "Hamala", "Oued Athmania", "Oued Endja", "Oued Seguen", "Rouached", "Sidi Khelifa", "Tassadane Haddada", "Teleghma", "Terrai Bainen", "Yahia Beniguecha"],
+      "44 - Aïn Defla": ["Aïn Defla", "Arib", "Bathia", "Belaas", "Bir Ould Khelifa", "Birbal", "Birhoum", "Boumedfaa", "Djelida", "Djemaa Ouled Cheikh", "El Amra", "El Attaf", "El Hassania", "El Maine", "Hammam Righa", "Hoceinia", "Khemis Miliana", "Miliana", "Oued Chorfa", "Oued Djemaa", "Rouina", "Tarik Ibn Ziad", "Tiberkanine", "Zeddine"],
+      "45 - Naâma": ["Naâma", "Ain Ben Khelil", "Ain Sefra", "Asla", "Djeniene Bourezg", "El Bier", "Makmen Ben Amer", "Mecheria", "Moghrar", "Sfissifa", "Tiout"],
+      "46 - Aïn Témouchent": ["Aïn Témouchent", "Ain Kihel", "Aoubellil", "Beni Saf", "Bouzedjar", "El Amria", "El Malah", "Hammam Bouhadjar", "Hassasna", "Oued Berkeche", "Oued Sabah", "Sidi Ben Adda", "Sidi Boumediene", "Sidi Ourial", "Terga", "Tlemcen"],
+      "47 - Ghardaïa": ["Ghardaïa", "Berriane", "Bounoura", "Dhayet Bendhahoua", "El Atteuf", "El Guerrara", "El Meniaa", "Metlili", "Sebseb", "Zelfana"],
+      "48 - Relizane": ["Relizane", "Ain Rahma", "Ain Tarek", "Ammi Moussa", "Belassel Bouzegza", "Beni Dergoun", "Beni Zentis", "Djidiouia", "El Hamadna", "El Matmar", "El Ouldja", "Had Echkalla", "Hamri", "Kalaa", "Mazouna", "Mendes", "Oued Rhiou", "Oued Sly", "Ramka", "Sidi Khettab", "Sidi Lazreg", "Souk El Had", "Yellel"],
+      "49 - Timimoun": ["Timimoun", "Aougrout", "Bordj Badji Mokhtar", "Charouine", "Ouled Said", "Talmine", "Tinerkouk", "Touggourt"],
+      "50 - Bordj Badji Mokhtar": ["Bordj Badji Mokhtar", "Tin Zaouatine"],
+      "51 - Ouled Djellal": ["Ouled Djellal", "Chaiba", "Sidi Khaled"],
+      "52 - Béni Abbès": ["Béni Abbès", "Kerzaz", "Ouled Khodeir", "Tabelbala"],
+      "53 - In Salah": ["In Salah", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Ghar", "Tazrouk"],
+      "54 - In Guezzam": ["In Guezzam", "Tin Zaouatine"],
+      "55 - Touggourt": ["Touggourt", "El Hadjira", "El Ogla", "Nezla", "Tebesbest", "Zaouia El Abidia"],
+      "56 - Djanet": ["Djanet", "Bordj Omar Driss"],
+      "57 - El M'Ghair": ["El M'Ghair", "Djamaa", "Oum Touyour", "Sidi Khellil"],
+      "58 - El Meniaa": ["El Meniaa", "Hassi Gara", "Hassi Fehal"]
+    };
+
+    // Populate Wilayas
+    const wilayaSel = document.getElementById('wilaya');
+    const communeSel = document.getElementById('commune');
+
+    Object.keys(wilayasData).sort().forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w;
+      opt.textContent = w;
+      wilayaSel.appendChild(opt);
+    });
+
+    wilayaSel.addEventListener('change', () => {
+      const selected = wilayaSel.value;
+      communeSel.innerHTML = '<option value="">Sélectionnez la commune</option>';
+      if (selected && wilayasData[selected]) {
+        wilayasData[selected].forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          communeSel.appendChild(opt);
+        });
+      }
+    });
+
+    // Check if user is already logged in
+    const user = getCurrentUser();
+    if (user) {
+      if (user.fullName) document.getElementById('fullName').value = user.fullName;
+      if (user.phone) document.getElementById('phone').value = user.phone;
+      if (user.email) document.getElementById('email').value = user.email;
+      if (user.wilaya) {
+        wilayaSel.value = user.wilaya;
+        wilayaSel.dispatchEvent(new Event('change'));
+        if (user.commune) communeSel.value = user.commune;
+      }
+      if (user.role === 'reseller' && user.status === 'pending') {
+        showStatusView(user.fullName, user.phone, `${user.wilaya} - ${user.commune}`);
+      }
+    }
+
+    // Handle Form Submit
+    document.getElementById('resellerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const originalBtnText = submitBtn.innerHTML;
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Traitement de la candidature...';
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const wilaya = wilayaSel.value;
+        const commune = communeSel.value;
+        const businessName = document.getElementById('businessName').value.trim();
+        const businessAddress = document.getElementById('businessAddress').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+
+        const result = await registerResellerApplication({
+          fullName, phone, email, password, wilaya, commune,
+          businessName, businessAddress, notes
+        });
+
+        showStatusView(fullName, phone, `${wilaya} - ${commune}`);
+
+      } catch (err) {
+        alert("Erreur : " + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
+
+    function showStatusView(name, phone, location) {
+      document.getElementById('resellerForm').style.display = 'none';
+      const statusDiv = document.getElementById('statusContainer');
+      document.getElementById('resCandidate').textContent = name;
+      document.getElementById('resPhone').textContent = phone;
+      document.getElementById('resLocation').textContent = location;
+      statusDiv.style.display = 'block';
+      statusDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

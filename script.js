@@ -1,0 +1,1091 @@
+// ========== IMPORT FIREBASE & AUTH ==========
+import { 
+  collection, getDocs, addDoc, query, doc, updateDoc, getDoc, 
+  orderBy, writeBatch 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from './firebase-config.js';
+import { 
+  getCurrentUser, isApprovedReseller, isPendingReseller, validateOrderPrices, refreshUserSession 
+} from './auth-service.js';
+
+// ========== VARIABLES GLOBALES ==========
+let products = [];
+let allFilteredProducts = [];
+let displayedCount = 10;
+const itemsPerPage = 10;
+let cart = [];
+let currentProductId = null;
+let isSubmitting = false; // 🛡️ Protection contre double-clic
+
+// Utility: Shuffle Array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// ========== PLACEHOLDER IMAGE (SVG Inline) ==========
+const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect fill='%23f3f4f6' width='300' height='200'/%3E%3Ccircle cx='150' cy='80' r='40' fill='%23d1d5db'/%3E%3Crect x='60' y='140' width='180' height='20' rx='10' fill='%23d1d5db'/%3E%3Ctext x='50%25' y='185' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle'%3EImage non disponible%3C/text%3E%3C/svg%3E`;
+
+// ========== INITIALISATION ==========
+document.addEventListener('DOMContentLoaded', async function () {
+  console.log("🚀 HAKIM CHENAN NUTRITION - Application démarrée...");
+  
+  // Refresh session from Firestore to catch any recent admin approvals/suspensions
+  await refreshUserSession();
+  updateHeaderAuthUI();
+
+  loadProductsFromFirebase();
+  setupEventListeners();
+  loadCartFromStorage();
+  populateShippingTable();
+
+  const modalBtn = document.getElementById('modalAddToCartBtn');
+  if (modalBtn) {
+    modalBtn.addEventListener('click', () => {
+      if (currentProductId) {
+        addToCart(currentProductId);
+        document.getElementById('productDetailModal').classList.remove('active');
+      }
+    });
+  }
+
+  // Listen to auth changes
+  window.addEventListener('hcn:auth-change', () => {
+    updateHeaderAuthUI();
+    loadProducts();
+    displayCart();
+  });
+});
+
+// Update header with user status
+function updateHeaderAuthUI() {
+  const user = getCurrentUser();
+  const accountBtnText = document.getElementById('headerAccountText');
+  const accountBtn = document.getElementById('headerAccountBtn');
+  const resellerBanner = document.getElementById('resellerPricingBanner');
+
+  if (accountBtnText) {
+    if (user && user.id) {
+      const name = user.firstName || user.fullName || 'Mon Compte';
+      if (isApprovedReseller(user)) {
+        accountBtnText.innerHTML = `${name} <span style="font-size:0.7rem; background:rgba(255,184,0,0.25); color:var(--pz-gold-dark); padding:2px 6px; border-radius:10px; font-weight:800; margin-left:4px;">REVENDEUR</span>`;
+      } else if (isPendingReseller(user)) {
+        accountBtnText.innerHTML = `${name} <span style="font-size:0.7rem; background:rgba(245,158,11,0.2); color:#d97706; padding:2px 6px; border-radius:10px; font-weight:800; margin-left:4px;">EN ATTENTE</span>`;
+      } else {
+        accountBtnText.textContent = name;
+      }
+    } else {
+      accountBtnText.textContent = 'Compte';
+    }
+  }
+
+  // Show wholesale pricing active banner if approved reseller
+  if (isApprovedReseller(user)) {
+    if (!resellerBanner) {
+      const banner = document.createElement('div');
+      banner.id = 'resellerPricingBanner';
+      banner.style.cssText = 'background:var(--pz-onyx); border-bottom:2px solid var(--pz-gold); color:var(--pz-gold); text-align:center; padding:10px 16px; font-size:0.85rem; font-weight:700; font-family:"Montserrat",sans-serif; letter-spacing:0.5px;';
+      banner.innerHTML = `<i class="fa-solid fa-handshake"></i> ESPACE REVENDEUR AGRÉÉ HAKIM CHENAN NUTRITION — TARIFS DE GROS APPLIQUÉS AUTOMATIQUEMENT`;
+      document.querySelector('.header')?.insertAdjacentElement('afterend', banner);
+    }
+  } else if (resellerBanner) {
+    resellerBanner.remove();
+  }
+}
+
+// ========== CHARGER LES PRODUITS DEPUIS FIREBASE ==========
+async function loadProductsFromFirebase() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) {
+    console.error("❌ productsGrid non trouvé dans le HTML");
+    return;
+  }
+
+  grid.innerHTML = `
+    <div style="text-align:center; padding:60px; color:#6b7280; grid-column:1/-1;">
+      <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem;"></i>
+      <p style="margin-top:16px;">Chargement des produits...</p>
+    </div>`;
+
+  try {
+    console.log("📦 Chargement des produits depuis Firebase...");
+
+    const productsRef = collection(db, "produits");
+    const productsQuery = query(productsRef, orderBy("dateAdded", "desc"));
+    const querySnapshot = await getDocs(productsQuery);
+
+    products = [];
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      products.push({
+        id: docSnap.id,
+        name: data.name || 'Produit sans nom',
+        price: parseFloat(data.price) || 0,
+        reseller_price: parseFloat(data.reseller_price) || 0,
+        reseller_pricing_enabled: (data.reseller_pricing_enabled === true || data.reseller_pricing_enabled === 'true'),
+        category: data.category || 'Autre',
+        description: data.description || '',
+        image: data.image || '',
+        quantity: parseInt(data.quantity) || 0,
+        dateAdded: data.dateAdded,
+        flavors: data.flavors || [],
+        ingredients: data.ingredients || []
+      });
+    });
+
+    console.log(`✅ ${products.length} produits chargés`);
+
+    if (products.length === 0) {
+      grid.innerHTML = `
+        <div style="text-align:center; padding:60px; color:#e74c3c; grid-column:1/-1;">
+          <i class="fa-solid fa-box-open" style="font-size:3rem; margin-bottom:16px;"></i>
+          <p>Aucun produit disponible pour le moment.</p>
+        </div>`;
+    } else {
+      shuffleArray(products);
+      allFilteredProducts = [...products];
+      displayedCount = itemsPerPage;
+      
+      updateCategoryCounts();
+      initCategoriesSlider();
+      validateCart();
+      loadProducts();
+    }
+  } catch (error) {
+    console.error("❌ Erreur chargement produits:", error);
+    grid.innerHTML = `
+      <div style="text-align:center; padding:60px; color:#ef4444; grid-column:1/-1;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; margin-bottom:16px;"></i>
+        <p>Erreur de chargement des produits.</p>
+        <p style="font-size:0.875rem; margin-top:8px;">${error.message}</p>
+      </div>`;
+  }
+}
+
+// ========== CATEGORIES SLIDER FUNCTIONALITY ==========
+function initCategoriesSlider() {
+  const slider = document.getElementById('categoriesSlider');
+  const prevBtn = document.getElementById('categoryPrev');
+  const nextBtn = document.getElementById('categoryNext');
+  const cards = document.querySelectorAll('.category-card');
+  
+  if (!slider || !prevBtn || !nextBtn) return;
+  
+  prevBtn.replaceWith(prevBtn.cloneNode(true));
+  nextBtn.replaceWith(nextBtn.cloneNode(true));
+  const newPrevBtn = document.getElementById('categoryPrev');
+  const newNextBtn = document.getElementById('categoryNext');
+  
+  newPrevBtn.addEventListener('click', () => {
+    slider.scrollBy({ left: -300, behavior: 'smooth' });
+  });
+  
+  newNextBtn.addEventListener('click', () => {
+    slider.scrollBy({ left: 300, behavior: 'smooth' });
+  });
+  
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      cards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const category = card.getAttribute('data-category');
+      filterProductsByCategory(category);
+    });
+  });
+  
+  slider.addEventListener('scroll', () => {
+    newPrevBtn.disabled = slider.scrollLeft <= 0;
+    newNextBtn.disabled = slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 10);
+  });
+  
+  newPrevBtn.disabled = true;
+}
+
+function filterProductsByCategory(category) {
+  allFilteredProducts = products.filter(product => {
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const matchesSearch = product.name?.toLowerCase().includes(searchTerm) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm));
+    const matchesCategory = category === 'all' || product.category === category;
+    return matchesSearch && matchesCategory;
+  });
+  
+  displayedCount = itemsPerPage;
+  loadProducts();
+}
+
+function updateCategoryCounts(productList = products) {
+  const counts = {
+    'all': productList.length,
+    'Protéines whey': 0,
+    'Creatine': 0,
+    'Masse / Gainer': 0,
+    'Acide aminé': 0,
+    'Force / Energie': 0,
+    'Brûleur de graisse': 0
+  };
+  
+  productList.forEach(product => {
+    if (counts[product.category] !== undefined) {
+      counts[product.category]++;
+    }
+  });
+  
+  const setEl = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  setEl('count-all', counts['all']);
+  setEl('count-whey', counts['Protéines whey']);
+  setEl('count-creatine', counts['Creatine']);
+  setEl('count-mass', counts['Masse / Gainer']);
+  setEl('count-amino', counts['Acide aminé']);
+  setEl('count-energy', counts['Force / Energie']);
+  setEl('count-burner', counts['Brûleur de graisse']);
+}
+
+// ========== AFFICHAGE DES PRODUITS AVEC TARIFS REVENDEURS ==========
+function loadProducts() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+
+  const paginationContainer = document.getElementById('paginationContainer');
+
+  if (!allFilteredProducts || allFilteredProducts.length === 0) {
+    grid.innerHTML = `
+      <div style="text-align:center; padding:60px; color:#6b7280; grid-column:1/-1;">
+        <i class="fa-solid fa-search" style="font-size:3rem; margin-bottom:16px;"></i>
+        <p>Aucun produit trouvé.</p>
+      </div>`;
+    if (paginationContainer) paginationContainer.style.display = 'none';
+    return;
+  }
+
+  const userIsApprovedReseller = isApprovedReseller();
+  const productsToDisplay = allFilteredProducts.slice(0, displayedCount);
+  grid.innerHTML = '';
+
+  productsToDisplay.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn')) return;
+      openProductDetail(product.id);
+    });
+
+    const img = document.createElement('img');
+    img.src = (product.image && product.image.trim()) ? product.image : 'https://via.placeholder.com/300x200?text=Produit';
+    img.alt = product.name;
+    img.className = 'product-image';
+    img.onerror = function () {
+      this.src = PLACEHOLDER_SVG;
+      this.style.objectFit = 'contain';
+    };
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProductDetail(product.id);
+    });
+
+    const info = document.createElement('div');
+    info.className = 'product-info';
+
+    const shortDesc = truncateDescription(product.description || '', 50);
+    const quantity = product.quantity || 0;
+    const inCartQty = getCartQuantityForProduct(product.id);
+    const availableQty = quantity - inCartQty;
+    
+    const quantityHTML = quantity > 0
+      ? `<span class="product-quantity">${quantity} en stock</span>`
+      : `<span class="product-quantity out-of-stock">Rupture de stock</span>`;
+
+    // Wholesale pricing logic
+    let priceHTML = '';
+    const hasWholesalePrice = userIsApprovedReseller && product.reseller_pricing_enabled && (product.reseller_price > 0);
+
+    if (hasWholesalePrice) {
+      priceHTML = `
+        <div style="display:flex; flex-direction:column;">
+          <span class="product-price" style="color:var(--pz-gold-dark);">${product.reseller_price.toFixed(2)} DA</span>
+          <span style="font-size:0.75rem; color:var(--pz-grey); text-decoration:line-through;">${product.price.toFixed(2)} DA</span>
+          <span style="font-size:0.68rem; background:rgba(255,184,0,0.2); color:var(--pz-gold-dark); padding:2px 6px; border-radius:4px; font-weight:800; width:fit-content; margin-top:2px;">
+            <i class="fa-solid fa-handshake"></i> Tarif Revendeur
+          </span>
+        </div>
+      `;
+    } else {
+      priceHTML = `<span class="product-price">${product.price.toFixed(2)} DA</span>`;
+    }
+
+    info.innerHTML = `
+      <h3 class="product-name" style="font-size:1.1rem; font-family:'Montserrat', sans-serif; font-weight:700; margin-bottom:8px; text-transform:uppercase;">${product.name}</h3>
+      <p class="product-category" style="font-size:0.75rem; color:var(--pz-gold); text-transform:uppercase; font-weight:700; margin-bottom:8px; letter-spacing:1px;">${product.category}</p>
+      <p class="product-description" style="font-size:0.875rem; color:var(--pz-grey); margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${shortDesc}</p>
+      ${quantityHTML}
+      <div class="product-footer" style="align-items:flex-end;">
+        ${priceHTML}
+        <button class="add-to-cart-btn" data-product-id="${product.id}" 
+          ${availableQty <= 0 ? 'disabled' : ''}>
+          ${quantity <= 0 ? 'Indisponible' : 
+            (availableQty <= 0 ? `<i class="fa-solid fa-check"></i> Dans panier` : 
+            `<i class="fa-solid fa-cart-plus"></i> Ajouter`)}
+        </button>
+      </div>
+    `;
+
+    card.appendChild(img);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const productId = btn.getAttribute('data-product-id');
+      addToCart(productId);
+    });
+  });
+
+  if (paginationContainer) {
+    paginationContainer.style.display = displayedCount < allFilteredProducts.length ? 'block' : 'none';
+  }
+}
+
+function getCartQuantityForProduct(productId) {
+  return cart
+    .filter(item => item.id === productId)
+    .reduce((sum, item) => sum + item.quantity, 0);
+}
+
+function validateCart() {
+  let modified = false;
+  const userIsApproved = isApprovedReseller();
+  
+  cart = cart.filter(item => {
+    const product = products.find(p => p.id === item.id);
+    if (!product) {
+      modified = true;
+      return false;
+    }
+    
+    // Check and update price according to current user's role
+    const effectivePrice = (userIsApproved && product.reseller_pricing_enabled && product.reseller_price > 0)
+      ? product.reseller_price
+      : product.price;
+
+    if (item.price !== effectivePrice) {
+      item.price = effectivePrice;
+      modified = true;
+    }
+
+    if (item.quantity > product.quantity) {
+      item.quantity = product.quantity;
+      modified = true;
+    }
+    
+    return item.quantity > 0;
+  });
+  
+  if (modified) {
+    saveCartToStorage();
+    updateCartCount();
+  }
+}
+
+function handleShowMore() {
+  displayedCount += itemsPerPage;
+  loadProducts();
+}
+
+function truncateDescription(description, maxLength) {
+  if (!description) return '';
+  description = description.trim();
+  if (description.length <= maxLength) return description;
+  const trimmed = description.substring(0, maxLength);
+  const lastSpace = trimmed.lastIndexOf(' ');
+  return lastSpace > 0 ? trimmed.substring(0, lastSpace) + '...' : trimmed + '...';
+}
+
+function openProductDetail(productId) {
+  window.location.href = `produit.html?id=${productId}`;
+}
+
+// ========== FONCTIONS DU PANIER ==========
+function addToCart(productId, flavorName = null) {
+  const product = products.find(p => p.id === productId);
+  if (!product) {
+    showNotification('Produit introuvable!', 'error');
+    return;
+  }
+
+  const stock = product.quantity || 0;
+  if (stock <= 0) {
+    showNotification('❌ Produit indisponible - rupture de stock!', 'error');
+    return;
+  }
+
+  const cartItemId = flavorName ? `${productId}_${flavorName}` : productId;
+  const existingItem = cart.find(item => item.cartItemId === cartItemId);
+  const totalInCart = getCartQuantityForProduct(productId);
+  const availableToAdd = stock - totalInCart;
+
+  if (availableToAdd <= 0) {
+    showNotification(`⚠️ Stock maximum atteint pour ${product.name}!`, 'error');
+    return;
+  }
+
+  const userIsApproved = isApprovedReseller();
+  const effectivePrice = (userIsApproved && product.reseller_pricing_enabled && product.reseller_price > 0)
+    ? product.reseller_price
+    : product.price;
+
+  if (existingItem) {
+    if (existingItem.quantity >= stock) {
+      showNotification('Quantité maximale atteinte!', 'error');
+      return;
+    }
+    existingItem.quantity += 1;
+    existingItem.price = effectivePrice; // Ensure latest price
+  } else {
+    cart.push({ 
+      ...product, 
+      price: effectivePrice,
+      quantity: 1, 
+      flavor: flavorName, 
+      cartItemId: cartItemId 
+    });
+  }
+
+  saveCartToStorage();
+  updateCartCount();
+  loadProducts();
+  showNotification(`✅ ${product.name} ${flavorName ? `(${flavorName}) ` : ''}ajouté au panier!`, 'success');
+}
+
+function updateCartQuantity(cartItemId, change) {
+  const item = cart.find(i => (i.cartItemId || i.id) === cartItemId);
+  if (!item) return;
+
+  const product = products.find(p => p.id === item.id);
+  const stock = product?.quantity || 0;
+  const newQuantity = item.quantity + change;
+  
+  if (newQuantity <= 0) {
+    removeCartItem(cartItemId);
+    return;
+  }
+  
+  if (newQuantity > stock) {
+    showNotification(`⚠️ Seulement ${stock} en stock!`, 'error');
+    return;
+  }
+
+  item.quantity = newQuantity;
+  saveCartToStorage();
+  displayCart();
+  loadProducts();
+}
+
+function removeCartItem(cartItemId) {
+  const item = cart.find(i => (i.cartItemId || i.id) === cartItemId);
+  cart = cart.filter(item => (item.cartItemId || item.id) !== cartItemId);
+  saveCartToStorage();
+  updateCartCount();
+  displayCart();
+  loadProducts();
+  
+  if (item) {
+    showNotification(`${item.name} retiré du panier`, 'info');
+  }
+}
+
+function displayCart() {
+  const cartItems = document.getElementById('cartItems');
+  if (!cartItems) return;
+
+  let total = 0;
+  if (cart.length === 0) {
+    cartItems.innerHTML = `<p style="text-align:center; color:#6b7280; padding:40px 0;">Votre panier est vide</p>`;
+    const totalPrice = document.getElementById('totalPrice');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (totalPrice) totalPrice.textContent = '0.00';
+    if (checkoutBtn) checkoutBtn.disabled = true;
+    return;
+  }
+
+  const userIsApproved = isApprovedReseller();
+  cartItems.innerHTML = '';
+
+  cart.forEach(item => {
+    // Recompute effective price based on role
+    const product = products.find(p => p.id === item.id);
+    if (product) {
+      item.price = (userIsApproved && product.reseller_pricing_enabled && product.reseller_price > 0)
+        ? product.reseller_price
+        : product.price;
+    }
+
+    const itemTotal = item.price * item.quantity;
+    total += itemTotal;
+    const currentCartItemId = item.cartItemId || item.id;
+
+    const cartItem = document.createElement('div');
+    cartItem.className = 'cart-item';
+    cartItem.style.cssText = 'display:flex; gap:16px; padding:16px 0; border-bottom:1px solid #e5e7eb; align-items:center;';
+    cartItem.innerHTML = `
+      <div class="cart-item-info" style="flex:1;">
+        <div class="cart-item-name" style="font-weight:600; margin-bottom:4px;">
+          ${item.name} 
+          ${item.flavor ? `<span style="font-size:0.75rem;color:var(--pz-gold);padding:2px 6px;background:rgba(255,184,0,0.1);border-radius:4px;margin-left:6px;">${item.flavor}</span>` : ''}
+          ${userIsApproved ? `<span style="font-size:0.7rem;color:var(--pz-gold-dark);background:rgba(255,184,0,0.15);padding:2px 6px;border-radius:4px;margin-left:4px;">Prix Gros</span>` : ''}
+        </div>
+        <div class="cart-item-price" style="color:#6b7280; font-size:0.875rem;">${item.price.toFixed(2)} DA × ${item.quantity} = ${itemTotal.toFixed(2)} DA</div>
+      </div>
+      <div class="cart-item-quantity" style="display:flex; align-items:center; gap:8px;">
+        <button class="quantity-btn" onclick="window.updateCartQuantity('${currentCartItemId}', -1)" style="width:28px; height:28px; border:1px solid #e5e7eb; background:#fff; border-radius:6px; cursor:pointer;">-</button>
+        <span style="font-weight:600;">${item.quantity}</span>
+        <button class="quantity-btn" onclick="window.updateCartQuantity('${currentCartItemId}', 1)" style="width:28px; height:28px; border:1px solid #e5e7eb; background:#fff; border-radius:6px; cursor:pointer;">+</button>
+      </div>
+      <button class="remove-btn" onclick="window.removeCartItem('${currentCartItemId}')" style="background:#f59e0b; color:#fff; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Supprimer</button>
+    `;
+    cartItems.appendChild(cartItem);
+  });
+
+  const totalPrice = document.getElementById('totalPrice');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  if (totalPrice) totalPrice.textContent = total.toFixed(2);
+  if (checkoutBtn) checkoutBtn.disabled = false;
+}
+
+function updateCartCount() {
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const badge = document.getElementById('cartCount');
+  if (badge) badge.textContent = count;
+}
+
+function saveCartToStorage() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+function loadCartFromStorage() {
+  const saved = localStorage.getItem('cart');
+  if (saved) {
+    try {
+      cart = JSON.parse(saved);
+      updateCartCount();
+    } catch (e) {
+      console.error("Erreur chargement panier:", e);
+      cart = [];
+    }
+  }
+}
+
+// ========== ÉVÉNEMENTS ==========
+function setupEventListeners() {
+  const cartBtn = document.getElementById('cartBtn');
+  const cartModal = document.getElementById('cartModal');
+  const closeButtons = document.querySelectorAll('.close-modal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const searchInput = document.getElementById('searchInput');
+
+  if (cartBtn && cartModal) {
+    cartBtn.addEventListener('click', () => {
+      cartModal.classList.add('active');
+      displayCart();
+    });
+  }
+
+  closeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modalOverlay = btn.closest('.modal-overlay');
+      if (modalOverlay) modalOverlay.classList.remove('active');
+    });
+  });
+
+  window.addEventListener('click', (e) => {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(overlay => {
+        overlay.classList.remove('active');
+      });
+    }
+  });
+
+  if (checkoutBtn && cartModal) {
+    checkoutBtn.addEventListener('click', () => {
+      if (cart.length > 0) {
+        cartModal.classList.remove('active');
+        openOrderForm();
+      }
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener('input', filterProducts);
+
+  const wilayaSearch = document.getElementById('wilayaSearch');
+  if (wilayaSearch) wilayaSearch.addEventListener('input', filterShippingTable);
+
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', handleShowMore);
+  }
+}
+
+function filterProducts() {
+  const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+  const activeCard = document.querySelector('.category-card.active');
+  const selectedCategory = activeCard ? activeCard.getAttribute('data-category') : 'all';
+
+  allFilteredProducts = products.filter(product => {
+    const matchesSearch = product.name?.toLowerCase().includes(searchTerm) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm));
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  displayedCount = itemsPerPage;
+  loadProducts();
+}
+
+// ========== FONCTIONS COUVERTURE LIVRAISON ==========
+function populateShippingTable() {
+  const tableBody = document.getElementById('coverageTableBody');
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '';
+  const sortedWilayas = Object.keys(wilayasData).sort((a, b) => parseInt(a) - parseInt(b));
+
+  sortedWilayas.forEach(wilaya => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${wilaya}</td>
+      <td class="price-tag">${shippingPrices[wilaya]} DA</td>
+      <td class="price-tag">${stopDeskPrices[wilaya]} DA</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function filterShippingTable() {
+  const searchTerm = document.getElementById('wilayaSearch')?.value.toLowerCase() || '';
+  const tableBody = document.getElementById('coverageTableBody');
+  if (!tableBody) return;
+
+  const rows = tableBody.getElementsByTagName('tr');
+  for (let row of rows) {
+    const wilayaName = row.cells[0].textContent.toLowerCase();
+    row.style.display = wilayaName.includes(searchTerm) ? '' : 'none';
+  }
+}
+
+// ========== FORMULAIRE DE COMMANDE ==========
+function generateOrderNumber() {
+  const now = new Date();
+  const datePart = now.toISOString().slice(2, 10).replace(/-/g, '');
+  let count = localStorage.getItem('orderCount') || '0';
+  count = String(parseInt(count) + 1).padStart(3, '0');
+  localStorage.setItem('orderCount', count);
+  return `HCN${datePart}${count}`;
+}
+
+function openOrderForm() {
+  const modal = document.getElementById('orderFormModal');
+  if (modal) {
+    modal.classList.add('active');
+    initializeWilayaSelect();
+
+    // Auto-fill customer info if logged in
+    const user = getCurrentUser();
+    if (user) {
+      if (user.firstName && document.getElementById('firstName')) document.getElementById('firstName').value = user.firstName;
+      if (user.lastName && document.getElementById('lastName')) document.getElementById('lastName').value = user.lastName;
+      if (user.phone && document.getElementById('phone1')) document.getElementById('phone1').value = user.phone;
+      if (user.wilaya && document.getElementById('wilaya')) {
+        document.getElementById('wilaya').value = user.wilaya;
+        document.getElementById('wilaya').dispatchEvent(new Event('change'));
+        if (user.commune && document.getElementById('commune')) {
+          document.getElementById('commune').value = user.commune;
+        }
+      }
+    }
+  }
+}
+
+function closeOrderForm() {
+  const modal = document.getElementById('orderFormModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function initializeWilayaSelect() {
+  const select = document.getElementById('wilaya');
+  if (!select || select.children.length > 1) return;
+
+  select.innerHTML = '<option value="">Sélectionner une wilaya</option>';
+  Object.keys(wilayasData).forEach(wilaya => {
+    const opt = document.createElement('option');
+    opt.value = wilaya;
+    opt.textContent = wilaya;
+    select.appendChild(opt);
+  });
+}
+
+function updateShippingPrice() {
+  const type = document.getElementById('orderType')?.value;
+  const wilaya = document.getElementById('wilaya')?.value;
+  const priceEl = document.getElementById('shippingPrice');
+  const info = document.querySelector('.shipping-info');
+
+  if (!type || !wilaya || !priceEl) return;
+
+  let price = 0;
+  if (type === 'domicile') price = shippingPrices[wilaya] || 0;
+  else if (type === 'stopdesk') price = stopDeskPrices[wilaya] || 0;
+
+  priceEl.textContent = price + ' DA';
+  if (info) info.classList.add('active');
+
+  const cartTotal = parseFloat(document.getElementById('totalPrice')?.textContent || '0');
+  const grandTotalEl = document.getElementById('grandTotal');
+  if (grandTotalEl) grandTotalEl.textContent = (cartTotal + price).toFixed(2) + ' DA';
+}
+
+// ========== WILAYAS & COMMUNES ==========
+const wilayasData = {
+  "01 - Adrar": ["Adrar", "Aoulef", "Charouine", "Reggane", "Tamentit", "Tsabit", "Zaouiet Kounta"],
+  "02 - Chlef": ["Chlef", "Abou", "Ain Merane", "Boukadir", "El Karimia", "Oued Fodda", "Tadjena", "Zeboudja"],
+  "03 - Laghouat": ["Laghouat", "Ain Madhi", "Brida", "El Ghicha", "Hassi Delaa", "Ksar El Hirane", "Sidi Makhlouf"],
+  "04 - Oum El Bouaghi": ["Oum El Bouaghi", "Ain Beida", "Ain M'lila", "Behir Chergui", "El Amiria", "Sigus", "Souk Naamane"],
+  "05 - Batna": ["Batna", "Ain Touta", "Arris", "Barika", "Bouzina", "El Madher", "Fesdis", "Ghassira", "Merouana", "N'Gaous", "Ras El Aioun", "Tazoult", "Timgad"],
+  "06 - Béjaïa": ["Béjaïa", "Akbou", "Amizour", "Chemini", "Darguina", "El Kseur", "Ifnayen", "Kherrata", "Seddouk", "Tichy", "Tifra", "Timezrit"],
+  "07 - Biskra": ["Biskra", "Ain Naga", "Bordj Ben Azzouz", "Chetma", "El Kantara", "El Outaya", "M'Chouneche", "Ouled Djellal", "Sidi Okba", "Zeribet El Oued"],
+  "08 - Béchar": ["Béchar", "Abadla", "Beni Ounif", "Kenadsa", "Lahmar", "Mechraa Houari Boumedienne", "Taghit"],
+  "09 - Blida": ["Blida", "Boufarik", "Bougara", "Chebli", "Chiffa", "El Affroun", "Mouzaia", "Oued Alleug", "Souhane"],
+  "10 - Bouira": ["Bouira", "Ain Bessem", "Bechloul", "Bordj Okhriss", "El Adjiba", "Haizer", "Lakhdaria", "M'Chedallah", "Sour El Ghozlane"],
+  "11 - Tamanrasset": ["Tamanrasset", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Amguel", "In Ghar", "In Salah", "Tazrouk"],
+  "12 - Tébessa": ["Tébessa", "Ain Zerga", "Bir El Ater", "Cheria", "El Aouinet", "El Ogla", "Morsott", "Negrine", "Ouenza", "Stah Guentis"],
+  "13 - Tlemcen": ["Tlemcen", "Ain Fezza", "Ain Youcef", "Beni Bahdel", "Beni Snous", "Bensekrane", "El Aricha", "El Fehoul", "Ghazaouet", "Hennaya", "Maghnia", "Mansourah", "Nedroma", "Remchi", "Sebdou", "Zenata"],
+  "14 - Tiaret": ["Tiaret", "Ain Deheb", "Ain Kermes", "Djillali Ben Amar", "Frenda", "Hamadia", "Ksar Chellala", "Mahdia", "Mechraa Safa", "Medroussa", "Oued Lili", "Rahouia", "Sougueur"],
+  "15 - Tizi Ouzou": ["Tizi Ouzou", "Ain El Hammam", "Akbil", "Azeffoun", "Boghni", "Boudjima", "Bouira", "Draa El Mizan", "Iferhounene", "Larbaa Nath Irathen", "Maatkas", "Makouda", "Mizrana", "Ouacif", "Ouadhia", "Tigzirt", "Timizart"],
+  "16 - Alger": ["Alger Centre", "Bab El Oued", "Birkhadem", "Bouzareah", "Dar El Beida", "El Biar", "Hussein Dey", "Kouba", "Mohamed Belouizdad", "Oued Koriche", "Sidi M'Hamed"],
+  "17 - Djelfa": ["Djelfa", "Ain Chouhada", "Ain El Ibel", "Birine", "Charef", "El Idrissia", "Faidh El Botma", "Guernini", "Hassi Bahbah", "Hassi El Euch", "Messaad", "Sidi Ladjel"],
+  "18 - Jijel": ["Jijel", "Ain Taya", "Boucif Ouled Askeur", "Chahna", "El Ancer", "El Milia", "Emir Abdelkader", "Ghebala", "Kaous", "Ouled Rabah", "Taher", "Texenna", "Ziama Mansouriah"],
+  "19 - Sétif": ["Sétif", "Ain Abessa", "Ain Arnat", "Ain Azel", "Ain El Kebira", "Ain Oulmene", "Amoucha", "Babor", "Bazer Sakhra", "Beidha Bordj", "Beni Aziz", "Bir El Arch", "Bouandas", "Bouga", "Djemila", "El Eulma", "Guenzet", "Guidjel", "Hammam Guergour", "Harbil", "Maaouia", "Maoklane", "Salah Bey", "Serdj El Ghoul", "Tachouda", "Tamazirt", "Tella", "Zerdaza"],
+  "20 - Saïda": ["Saïda", "Ain El Hadjar", "Ain Sekhouna", "Doui Thabet", "El Hassasna", "Hounet", "Maamora", "Moulay Larbi", "Ouled Brahim", "Ouled Khaled", "Youb"],
+  "21 - Skikda": ["Skikda", "Ain Kechra", "Azzaba", "Ben Azzouz", "Collo", "El Harrouch", "Oued Zehour", "Ramdane Djamel", "Sidi Mezghiche", "Tamalous", "Zitouna"],
+  "22 - Sidi Bel Abbès": ["Sidi Bel Abbès", "Ain Adden", "Ain Thrid", "Ben Badis", "Marhoum", "Mérine", "Mostefa Ben Brahim", "Moulay Slissen", "Oued Taourira", "Ras El Ma", "Sfisef", "Tafraoui", "Telagh", "Ténira"],
+  "23 - Annaba": ["Annaba", "Ain Berda", "Berrahal", "Chorfa", "El Bouni", "El Hadjar", "Oued El Aneb", "Seraidi", "Treat"],
+  "24 - Guelma": ["Guelma", "Ain Ben Beida", "Ain Reggada", "Bou Hamdane", "Bouati Mahmoud", "Dahoua", "El Fedjoudj Boughrara", "Hammam Debagh", "Hammam N'Bails", "Heliopolis", "Khezaras", "Oued Zenati", "Ras El Agba", "Salaoua Announa", "Zemmoura"],
+  "25 - Constantine": ["Constantine", "Ain Smara", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Ibn Ziad", "Messaouda", "Zighoud Youcef"],
+  "26 - Médéa": ["Médéa", "Ain Boucif", "Ain Ouksir", "Aziz", "Berrouaghia", "Chahbounia", "Chelif", "Deux Bassins", "Djouab", "El Azizia", "El Omaria", "Guelb El Kebir", "Ksar El Boukhari", "Mihoub", "Oued Harbil", "Ouled Deid", "Ouled Hellal", "Ouled Maaref", "Seghouane", "Si Mahdjoub", "Souagui", "Tablat"],
+  "27 - Mostaganem": ["Mostaganem", "Ain Tedles", "Ain Sidi Cherif", "Bouguirat", "Hassi Mamèche", "Kheir Eddine", "Mesra", "Ouled Boughalem", "Ouled Malah", "Sidi Ali", "Sidi Lakhdar", "Sirat", "Stidia", "Tazgait"],
+  "28 - M'Sila": ["M'Sila", "Ain El Melh", "Ben Srour", "Bou Saada", "Chellal", "Djebel Messaad", "El Hamel", "El Houamed", "Hammam Dhalaâ", "Khoubana", "Maadid", "Magra", "Medjedel", "Ouanougha", "Ouled Derradj", "Ouled Sidi Brahim", "Sidi Aissa", "Sidi Hadjeres", "Sidi M'hamed", "Souamaa", "Tarmount", "Zarzit"],
+  "29 - Mascara": ["Mascara", "Ain Farès", "Ain Fekroun", "Ain Fekan", "Aouf", "El Bordj", "El Gaada", "El Ghomri", "El Keurt", "El Menaouer", "Froha", "Ghriss", "Hachem", "Hacine", "Maoussa", "Mohammadia", "Mocta Douz", "Nesmoth", "Oggaz", "Oued El Abtal", "Oued Taria", "Ras Ain Amirouche", "Sidi Abdeldjebar", "Sidi Kada", "Sidi Zahar", "Tighennif", "Tizi", "Zahana"],
+  "30 - Ouargla": ["Ouargla", "Ain Beida", "El Allia", "El Hadjira", "El Hajeb", "Hassi Ben Abdellah", "Hassi Messaoud", "N'Goussa", "Rouissat", "Sidi Khouiled", "Taibet", "Tebesbest", "Touggourt", "Zaouia El Abidia"],
+  "31 - Oran": ["Oran", "Arzew", "Bethioua", "Bir El Djir", "Es Senia", "Gdyel", "Hassi Bounif", "Marsat El Hadjadj", "Mers El Kebir", "Misserghin", "Oued Tlelat", "Sidi Ben Yebka", "Sidi Chami"],
+  "32 - El Bayadh": ["El Bayadh", "Ain El Orak", "Bougtoub", "Brézina", "Chellala", "El Abiodh Sidi Cheikh", "El Bnoud", "Ghassoul", "Kef El Ahmar", "Rogassa", "Sidi Slimane", "Stitten"],
+  "33 - Illizi": ["Illizi", "Bordj Omar Driss", "Djanet", "Debdeb", "El Borma", "In Amenas", "In Guezzam", "In Salah", "Tin Zaouatine"],
+  "34 - Bordj Bou Arréridj": ["Bordj Bou Arréridj", "Ain Taghrout", "Belimour", "Bir Kasdali", "Bordj Ghdir", "Bordj Zemmoura", "Colla", "El Achir", "El Anser", "El Hamadia", "El Main", "El M'hir", "Ghilassa", "Haraza", "Hasnaoua", "Ksour", "Mansourah", "Medjana", "Ouled Brahem", "Ouled Dahmane", "Ouled Sidi Brahim", "Ras El Oued", "Righa", "Taglait", "Teniet En Nasr"],
+  "35 - Boumerdès": ["Boumerdès", "Ammal", "Baghlia", "Bordj Menaiel", "Boudouaou", "Boudouaou El Bahri", "Chabet El Ameur", "Dellys", "Isser", "Khemis El Khechna", "Legata", "Naciria", "Ouled Aissa", "Ouled Fayet", "Si Mustapha", "Souk El Had", "Thénia"],
+  "36 - El Tarf": ["El Tarf", "Ain Kercha", "Ben M'Hidi", "Besbes", "Bouhadjar", "Boutheldja", "Dréan", "El Kala", "Lac des Oiseaux", "Souarekh"],
+  "37 - Tindouf": ["Tindouf", "Aouinet Bel Egrâ", "Fenoughil", "Oum El Assel"],
+  "38 - Tissemsilt": ["Tissemsilt", "Ammari", "Belaassel Bouzegza", "Beni Chaib", "Boucaid", "Bouhatem", "Boukhanafis", "Khemisti", "Lazharia", "Layoune", "Maacem", "Sidi Abed", "Sidi Boutouchent", "Sidi Lantri", "Tamalaht", "Theniet El Had"],
+  "39 - El Oued": ["El Oued", "Bayadha", "Debila", "El Ogla", "Guemar", "Hassi Khelifa", "Magrane", "Mih Ouensa", "Oued Souf", "Reguiba", "Robbah", "Taleb Larbi", "Trifaoui"],
+  "40 - Khenchela": ["Khenchela", "Ain Touila", "Babar", "Bouhmama", "Chechar", "El Hamma", "El Mahmal", "El Mahres", "El Ouenza", "Hammam Essalihine", "Kais", "Ouled Rechache", "Remila", "Yabous"],
+  "41 - Souk Ahras": ["Souk Ahras", "Ain Zana", "Bir Bouhouche", "Heddada", "Khedara", "M'Daourouch", "Mechroha", "Merahna", "Ouled Driss", "Oum El Adhaïm", "Sedrata", "Taoura", "Zouabi"],
+  "42 - Tipaza": ["Tipaza", "Ahmar El Ain", "Bou Ismail", "Cherchell", "Damous", "Fouka", "Gouraya", "Hadjout", "Koléa", "Menaceur", "Nador", "Sidi Amar", "Sidi Ghiles", "Sidi Rached", "Sidi Semiane", "Tipasa"],
+  "43 - Mila": ["Mila", "Ain Beida", "Ain Mellouk", "Chelghoum Laid", "El Ayadi Barbes", "El Barka", "El Eulma", "Ferdjioua", "Grarem Gouga", "Hamala", "Oued Athmania", "Oued Endja", "Oued Seguen", "Rouached", "Sidi Khelifa", "Tassadane Haddada", "Teleghma", "Terrai Bainen", "Yahia Beniguecha"],
+  "44 - Aïn Defla": ["Aïn Defla", "Arib", "Bathia", "Belaas", "Bir Ould Khelifa", "Birbal", "Birhoum", "Boumedfaa", "Djelida", "Djemaa Ouled Cheikh", "El Amra", "El Attaf", "El Hassania", "El Maine", "Hammam Righa", "Hoceinia", "Khemis Miliana", "Miliana", "Oued Chorfa", "Oued Djemaa", "Rouina", "Tarik Ibn Ziad", "Tiberkanine", "Zeddine"],
+  "45 - Naâma": ["Naâma", "Ain Ben Khelil", "Ain Sefra", "Asla", "Djeniene Bourezg", "El Bier", "Makmen Ben Amer", "Mecheria", "Moghrar", "Sfissifa", "Tiout"],
+  "46 - Aïn Témouchent": ["Aïn Témouchent", "Ain Kihel", "Aoubellil", "Beni Saf", "Bouzedjar", "El Amria", "El Malah", "Hammam Bouhadjar", "Hassasna", "Oued Berkeche", "Oued Sabah", "Sidi Ben Adda", "Sidi Boumediene", "Sidi Ourial", "Terga", "Tlemcen"],
+  "47 - Ghardaïa": ["Ghardaïa", "Berriane", "Bounoura", "Dhayet Bendhahoua", "El Atteuf", "El Guerrara", "El Meniaa", "Metlili", "Sebseb", "Zelfana"],
+  "48 - Relizane": ["Relizane", "Ain Rahma", "Ain Tarek", "Ammi Moussa", "Belassel Bouzegza", "Beni Dergoun", "Beni Zentis", "Djidiouia", "El Hamadna", "El Matmar", "El Ouldja", "Had Echkalla", "Hamri", "Kalaa", "Mazouna", "Mendes", "Oued Rhiou", "Oued Sly", "Ramka", "Sidi Khettab", "Sidi Lazreg", "Souk El Had", "Yellel"],
+  "49 - Timimoun": ["Timimoun", "Aougrout", "Bordj Badji Mokhtar", "Charouine", "Ouled Said", "Talmine", "Tinerkouk", "Touggourt"],
+  "50 - Bordj Badji Mokhtar": ["Bordj Badji Mokhtar", "Tin Zaouatine"],
+  "51 - Ouled Djellal": ["Ouled Djellal", "Chaiba", "Sidi Khaled"],
+  "52 - Béni Abbès": ["Béni Abbès", "Kerzaz", "Ouled Khodeir", "Tabelbala"],
+  "53 - In Salah": ["In Salah", "Abalessa", "Foggaret Ezzaouia", "Idles", "In Ghar", "Tazrouk"],
+  "54 - In Guezzam": ["In Guezzam", "Tin Zaouatine"],
+  "55 - Touggourt": ["Touggourt", "El Hadjira", "El Ogla", "Nezla", "Tebesbest", "Zaouia El Abidia"],
+  "56 - Djanet": ["Djanet", "Bordj Omar Driss"],
+  "57 - El M'Ghair": ["El M'Ghair", "Djamaa", "Oum Touyour", "Sidi Khellil"],
+  "58 - El Meniaa": ["El Meniaa", "Hassi Gara", "Hassi Fehal"]
+};
+
+// ========== PRIX DE LIVRAISON ==========
+const shippingPrices = {
+  "01 - Adrar": 1500, "02 - Chlef": 800, "03 - Laghouat": 1000, "04 - Oum El Bouaghi": 800,
+  "05 - Batna": 800, "06 - Béjaïa": 800, "07 - Biskra": 1000, "08 - Béchar": 1200,
+  "09 - Blida": 600, "10 - Bouira": 700, "11 - Tamanrasset": 2000, "12 - Tébessa": 900,
+  "13 - Tlemcen": 800, "14 - Tiaret": 900, "15 - Tizi Ouzou": 700, "16 - Alger": 500,
+  "17 - Djelfa": 1000, "18 - Jijel": 800, "19 - Sétif": 800, "20 - Saïda": 900,
+  "21 - Skikda": 800, "22 - Sidi Bel Abbès": 800, "23 - Annaba": 800, "24 - Guelma": 900,
+  "25 - Constantine": 800, "26 - Médéa": 700, "27 - Mostaganem": 800, "28 - M'Sila": 800,
+  "29 - Mascara": 800, "30 - Ouargla": 1100, "31 - Oran": 800, "32 - El Bayadh": 1200,
+  "33 - Illizi": 1900, "34 - Bordj Bou Arréridj": 800, "35 - Boumerdès": 600, "36 - El Tarf": 900,
+  "37 - Tindouf": 1700, "38 - Tissemsilt": 800, "39 - El Oued": 1100, "40 - Khenchela": 900,
+  "41 - Souk Ahras": 900, "42 - Tipaza": 600, "43 - Mila": 800, "44 - Aïn Defla": 800,
+  "45 - Naâma": 1200, "46 - Aïn Témouchent": 800, "47 - Ghardaïa": 1100, "48 - Relizane": 800,
+  "49 - Timimoun": 1500, "50 - Bordj Badji Mokhtar": 1500, "51 - Ouled Djellal": 1000,
+  "52 - Béni Abbès": 1200, "53 - In Salah": 1800, "54 - In Guezzam": 3500,
+  "55 - Touggourt": 1000, "56 - Djanet": 2200, "57 - El M'Ghair": 1800, "58 - El Meniaa": 1100
+};
+
+const stopDeskPrices = {
+  "01 - Adrar": 1000, "02 - Chlef": 500, "03 - Laghouat": 600, "04 - Oum El Bouaghi": 500,
+  "05 - Batna": 500, "06 - Béjaïa": 500, "07 - Biskra": 600, "08 - Béchar": 800,
+  "09 - Blida": 400, "10 - Bouira": 450, "11 - Tamanrasset": 1500, "12 - Tébessa": 600,
+  "13 - Tlemcen": 500, "14 - Tiaret": 600, "15 - Tizi Ouzou": 450, "16 - Alger": 300,
+  "17 - Djelfa": 600, "18 - Jijel": 500, "19 - Sétif": 550, "20 - Saïda": 600,
+  "21 - Skikda": 500, "22 - Sidi Bel Abbès": 500, "23 - Annaba": 500, "24 - Guelma": 600,
+  "25 - Constantine": 500, "26 - Médéa": 450, "27 - Mostaganem": 500, "28 - M'Sila": 500,
+  "29 - Mascara": 500, "30 - Ouargla": 700, "31 - Oran": 500, "32 - El Bayadh": 800,
+  "33 - Illizi": 1500, "34 - Bordj Bou Arréridj": 500, "35 - Boumerdès": 400, "36 - El Tarf": 600,
+  "37 - Tindouf": 1000, "38 - Tissemsilt": 500, "39 - El Oued": 700, "40 - Khenchela": 600,
+  "41 - Souk Ahras": 600, "42 - Tipaza": 400, "43 - Mila": 500, "44 - Aïn Defla": 500,
+  "45 - Naâma": 800, "46 - Aïn Témouchent": 500, "47 - Ghardaïa": 700, "48 - Relizane": 500,
+  "49 - Timimoun": 1000, "50 - Bordj Badji Mokhtar": 1000, "51 - Ouled Djellal": 600,
+  "52 - Béni Abbès": 800, "53 - In Salah": 1200, "54 - In Guezzam": 3500,
+  "55 - Touggourt": 600, "56 - Djanet": 1600, "57 - El M'Ghair": 1800, "58 - El Meniaa": 800
+};
+
+// ========== SOUMISSION COMMANDE AVEC VALIDATION SERVEUR DES PRIX (CRITIQUE) ==========
+async function submitOrderForm() {
+  if (isSubmitting) {
+    showNotification('⏳ Commande en cours de traitement...', 'info');
+    return;
+  }
+
+  const form = document.getElementById('orderForm');
+  if (!form) return;
+
+  const orderType = form.orderType?.value;
+  const wilaya = form.wilaya?.value;
+  const commune = form.commune?.value;
+
+  if (!orderType || !wilaya || !commune) {
+    showNotification("❌ Veuillez remplir tous les champs obligatoires.", 'error');
+    return;
+  }
+
+  if (cart.length === 0) {
+    showNotification("❌ Votre panier est vide.", 'error');
+    return;
+  }
+
+  isSubmitting = true;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalBtnText = submitBtn?.innerHTML;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Vérification des prix & validation...';
+  }
+
+  try {
+    // 🛡️ CRITICAL SECURITY: Price & Role Validation directly against database
+    const currentUser = getCurrentUser();
+    console.log("🛡️ Validation des prix serveur avec le rôle utilisateur...");
+    const priceValidation = await validateOrderPrices(cart, currentUser);
+
+    let shippingPrice = 0;
+    if (orderType === 'domicile') shippingPrice = shippingPrices[wilaya] || 0;
+    else if (orderType === 'stopdesk') shippingPrice = stopDeskPrices[wilaya] || 0;
+
+    const validatedCartTotal = priceValidation.cartTotal;
+    const validatedGrandTotal = validatedCartTotal + shippingPrice;
+    const orderNumber = generateOrderNumber();
+
+    const commande = {
+      orderNumber,
+      status: 'pending',
+      orderType,
+      customerId: currentUser?.id || null,
+      customerRole: priceValidation.isWholesaleOrder ? 'reseller' : 'customer',
+      isWholesaleOrder: priceValidation.isWholesaleOrder,
+      firstName: form.firstName?.value.trim() || '',
+      lastName: form.lastName?.value.trim() || '',
+      phone1: form.phone1?.value.trim() || '',
+      phone2: form.phone2?.value.trim() || null,
+      wilaya,
+      commune,
+      cartItems: priceValidation.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        flavor: item.flavor || null,
+        price: item.unitPrice,
+        regularPrice: item.regularPrice,
+        isWholesale: item.isWholesale,
+        quantity: item.quantity,
+        total: item.total
+      })),
+      cartTotal: validatedCartTotal,
+      shippingPrice,
+      grandTotal: validatedGrandTotal,
+      date: new Date().toISOString()
+    };
+
+    console.log("📤 Envoi de la commande vérifiée à Firebase...");
+    const orderRef = await addDoc(collection(db, "commandes"), commande);
+    console.log("✅ Commande sauvegardée avec ID:", orderRef.id);
+
+    // Atomically decrement stock
+    await updateProductsQuantities(cart);
+
+    closeOrderForm();
+    const confirmModal = document.getElementById('confirmModal');
+    const orderNumberEl = document.getElementById('orderNumber');
+    if (confirmModal) confirmModal.classList.add('active');
+    if (orderNumberEl) orderNumberEl.textContent = orderNumber;
+
+    cart = [];
+    saveCartToStorage();
+    updateCartCount();
+    form.reset();
+
+    if (document.getElementById('shippingPrice')) {
+      document.getElementById('shippingPrice').textContent = '0 DA';
+    }
+
+    showNotification(`✅ Commande validée avec succès ! N° ${orderNumber}`, 'success');
+    await loadProductsFromFirebase();
+
+  } catch (error) {
+    console.error("❌ Erreur validation/envoi commande:", error);
+    showNotification(`❌ ${error.message || "Erreur lors de l'envoi."}`, 'error');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
+  } finally {
+    isSubmitting = false;
+  }
+}
+
+// ========== ⚡ METTRE À JOUR QUANTITÉS AVEC BATCH ==========
+async function updateProductsQuantities(cartItems) {
+  const results = [];
+  const batch = writeBatch(db);
+  const productRefs = [];
+  
+  try {
+    for (const item of cartItems) {
+      const productRef = doc(db, "produits", item.id);
+      const productDoc = await getDoc(productRef);
+
+      if (productDoc.exists()) {
+        const currentQuantity = productDoc.data().quantity || 0;
+        const newQuantity = Math.max(0, currentQuantity - item.quantity);
+        
+        batch.update(productRef, { 
+          quantity: newQuantity,
+          updatedAt: new Date().toISOString()
+        });
+        
+        productRefs.push({ id: item.id, name: item.name, newQty: newQuantity });
+      }
+    }
+
+    await batch.commit();
+    return productRefs;
+
+  } catch (error) {
+    console.error("❌ Batch update error:", error);
+    return [];
+  }
+}
+
+// ========== NOTIFICATIONS ==========
+function showNotification(message, type = 'success') {
+  const existing = document.querySelectorAll('.notification-toast');
+  existing.forEach(n => n.remove());
+
+  const notif = document.createElement('div');
+  notif.className = 'notification-toast';
+  
+  const bgColor = {
+    'success': '#10b981',
+    'error': '#ef4444',
+    'info': '#3b82f6'
+  }[type] || '#10b981';
+  
+  const icon = {
+    'success': 'fa-circle-check',
+    'error': 'fa-circle-exclamation',
+    'info': 'fa-circle-info'
+  }[type] || 'fa-circle-info';
+  
+  notif.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${bgColor};
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 350px;
+  `;
+  notif.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+  document.body.appendChild(notif);
+
+  setTimeout(() => {
+    notif.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => notif.remove(), 300);
+  }, 3000);
+}
+
+// ========== LISTENERS ==========
+document.addEventListener('DOMContentLoaded', () => {
+  const wilayaSel = document.getElementById('wilaya');
+  const typeSel = document.getElementById('orderType');
+  const communeSel = document.getElementById('commune');
+
+  if (wilayaSel) {
+    wilayaSel.addEventListener('change', () => {
+      const w = wilayaSel.value;
+      if (communeSel) {
+        communeSel.innerHTML = '<option value="">Sélectionner une commune</option>';
+        if (w && wilayasData[w]) {
+          wilayasData[w].forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            communeSel.appendChild(opt);
+          });
+        }
+      }
+      updateShippingPrice();
+    });
+  }
+
+  if (typeSel) {
+    typeSel.addEventListener('change', updateShippingPrice);
+  }
+
+  const orderForm = document.getElementById('orderForm');
+  if (orderForm) {
+    orderForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitOrderForm();
+    });
+  }
+});
+
+// ========== EXPOSER FONCTIONS GLOBALES ==========
+window.addToCart = addToCart;
+window.updateCartQuantity = updateCartQuantity;
+window.removeCartItem = removeCartItem;
+window.updateQuantity = updateCartQuantity;
+window.removeFromCart = removeCartItem;
+window.openProductDetail = openProductDetail;
+window.displayCart = displayCart;

@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0F">
+  <title>Suivi de Commande | HAKIM CHENAN NUTRITION</title>
+  <link rel="icon" href="logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ========== POWER ZONE - PREMIUM ATHLETIC THEME ========== */
+    :root {
+      --pz-onyx: #0A0A0F;
+      --pz-graphite: #1A1D29;
+      --pz-charcoal: #252836;
+      --pz-slate: #3D4152;
+      
+      --pz-gold: #FFB800;
+      --pz-gold-light: #FFD666;
+      --pz-gold-glow: rgba(255, 184, 0, 0.25);
+      --pz-gold-dark: #CC9200;
+      
+      --pz-energy: #FF4D2E;
+      --pz-energy-light: #FF6B4D;
+      --pz-energy-dark: #E63E1F;
+      --pz-energy-glow: rgba(255, 77, 46, 0.3);
+      
+      --pz-white: #FFFFFF;
+      --pz-cream: #FAF9F6;
+      --pz-light: #F3F4F6;
+      --pz-silver: #9CA3AF;
+      --pz-grey: #4B5563;
+      --pz-dark: #1F2937;
+      
+      --pz-success: #10B981;
+      --pz-success-light: rgba(16, 185, 129, 0.15);
+      --pz-danger: #EF4444;
+      --pz-info: #3B82F6;
+      
+      --shadow-sm: 0 2px 8px rgba(10, 10, 15, 0.08);
+      --shadow: 0 10px 30px rgba(10, 10, 15, 0.12);
+      --shadow-lg: 0 20px 50px rgba(10, 10, 15, 0.2);
+      --shadow-gold: 0 15px 40px rgba(255, 184, 0, 0.3);
+      --shadow-energy: 0 10px 30px rgba(255, 77, 46, 0.4);
+      
+      --radius: 8px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      
+      --gradient-gold: linear-gradient(135deg, #FFB800 0%, #CC9200 100%);
+      --gradient-energy: linear-gradient(135deg, #FF4D2E 0%, #E63E1F 100%);
+      --gradient-dark: linear-gradient(180deg, #0A0A0F 0%, #1A1D29 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: var(--pz-cream);
+      color: var(--pz-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    button { font-family: inherit; cursor: pointer; border: none; outline: none; transition: var(--transition); }
+
+    /* ========== HEADER - موحد مع باقي الصفحات ========== */
+    .header {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-container {
+      max-width: 1400px; margin: 0 auto; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+
+    .logo { 
+      display: flex; align-items: center; gap: 12px; 
+      font-family: 'Montserrat', sans-serif;
+      flex-shrink: 0;
+    }
+    .logo img { 
+      height: 55px; width: auto; 
+      border-radius: var(--radius);
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(10, 10, 15, 0.15));
+      transition: var(--transition);
+    }
+    .logo:hover img {
+      transform: scale(1.05);
+      filter: drop-shadow(0 4px 12px rgba(255, 184, 0, 0.3));
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-name { 
+      font-size: 1.5rem; font-weight: 900; color: var(--pz-onyx); 
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .brand-tagline { 
+      font-size: 0.7rem; font-weight: 800; color: var(--pz-gold); 
+      text-transform: uppercase; letter-spacing: 4px;
+      margin-top: 3px;
+    }
+
+    .header-actions { 
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-btn {
+      display: flex; align-items: center; gap: 8px; 
+      padding: 10px 18px;
+      border-radius: var(--radius); 
+      background: var(--pz-white);
+      color: var(--pz-dark);
+      font-weight: 600; font-size: 0.9rem; 
+      border: 1.5px solid var(--pz-light);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .header-btn:hover { 
+      border-color: var(--pz-gold);
+      color: var(--pz-gold-dark);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-btn i { font-size: 1rem; }
+    
+    /* ✅ زر Suivi نشط (Active) - لأننا في صفحة Suivi */
+    .header-btn.active {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      border-color: var(--pz-gold);
+      font-weight: 800;
+    }
+    .header-btn.active:hover {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .cart-btn { 
+      background: var(--gradient-gold); 
+      color: var(--pz-onyx); 
+      border-color: var(--pz-gold);
+      font-weight: 800;
+      position: relative;
+    }
+    .cart-btn:hover { 
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .cart-count {
+      position: absolute; top: -8px; right: -8px; 
+      background: var(--pz-energy);
+      color: white; width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; 
+      border: 2px solid var(--pz-white);
+      box-shadow: var(--shadow-energy);
+    }
+
+    /* ========== CONTAINER ========== */
+    .tracking-container {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .tracking-card {
+      background: var(--pz-white);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      padding: 40px;
+      border: 1px solid var(--pz-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracking-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: var(--gradient-gold);
+    }
+
+    .tracking-title {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .tracking-title h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 10px;
+      color: var(--pz-onyx);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tracking-title p {
+      color: var(--pz-grey);
+      font-size: 0.95rem;
+    }
+
+    /* ========== SEARCH FORM ========== */
+    .search-form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--pz-light);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      background: var(--pz-white);
+      color: var(--pz-dark);
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--pz-gold);
+      box-shadow: 0 0 0 4px var(--pz-gold-glow);
+    }
+
+    .search-input::placeholder {
+      color: var(--pz-silver);
+    }
+
+    .search-btn {
+      padding: 14px 28px;
+      background: var(--gradient-energy);
+      color: var(--pz-white);
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-energy);
+    }
+
+    .search-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(255, 77, 46, 0.5);
+      filter: brightness(1.1);
+    }
+
+    .search-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .search-btn:disabled {
+      background: var(--pz-light);
+      color: var(--pz-silver);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ========== ERROR MESSAGE ========== */
+    .error-message {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--pz-danger);
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      display: none;
+      border: 1.5px solid rgba(239, 68, 68, 0.3);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .error-message.show {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+    }
+
+    /* ========== TIMELINE ========== */
+    .status-timeline {
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 32px;
+    }
+
+    .status-timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      background: var(--pz-light);
+      border-radius: 2px;
+    }
+
+    .status-item {
+      position: relative;
+      margin-bottom: 28px;
+      opacity: 0.4;
+      transition: var(--transition);
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-item.active,
+    .status-item.completed {
+      opacity: 1;
+    }
+
+    .status-dot {
+      position: absolute;
+      left: -32px;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--pz-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pz-silver);
+      font-size: 0.8rem;
+      transition: var(--transition);
+      border: 3px solid var(--pz-white);
+      box-shadow: 0 0 0 2px var(--pz-light);
+    }
+
+    .status-item.active .status-dot {
+      background: var(--gradient-energy);
+      color: var(--pz-white);
+      box-shadow: 0 0 0 4px var(--pz-energy-glow), var(--shadow-energy);
+      animation: pulse 2s infinite;
+    }
+
+    .status-item.completed .status-dot {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      box-shadow: 0 0 0 2px var(--pz-gold), var(--shadow-gold);
+    }
+
+    .status-item.completed .status-content h3 {
+      color: var(--pz-onyx);
+    }
+
+    .status-item.active .status-content h3 {
+      color: var(--pz-energy-dark);
+    }
+
+    .status-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--pz-dark);
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 0.3px;
+    }
+
+    .status-content p {
+      color: var(--pz-grey);
+      font-size: 0.88rem;
+    }
+
+    /* ========== ORDER INFO ========== */
+    .order-info {
+      background: var(--pz-cream);
+      border: 1.5px solid var(--pz-light);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+    }
+
+    .order-info h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--pz-onyx);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .order-info h3 i {
+      color: var(--pz-gold);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--pz-light);
+      font-size: 0.92rem;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--pz-grey);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-weight: 600;
+      text-align: right;
+      color: var(--pz-dark);
+    }
+
+    .info-value a {
+      color: var(--pz-energy);
+      font-weight: 700;
+    }
+
+    .info-value a:hover {
+      color: var(--pz-energy-dark);
+      text-decoration: underline;
+    }
+
+    /* ========== DRIVER INFO SECTION ========== */
+    .driver-info {
+      background: linear-gradient(135deg, rgba(255, 184, 0, 0.08), rgba(255, 184, 0, 0.15));
+      border: 2px solid var(--pz-gold);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 28px;
+      display: none;
+      animation: slideUp 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .driver-info::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 5px; height: 100%;
+      background: var(--gradient-gold);
+    }
+
+    .driver-info.show {
+      display: block;
+    }
+
+    .driver-info h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--pz-onyx);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .driver-info h3 i {
+      color: var(--pz-gold-dark);
+    }
+
+    .driver-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--pz-white);
+      border-radius: var(--radius);
+      border: 1px solid var(--pz-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .driver-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-gold);
+    }
+
+    .driver-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .driver-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: var(--pz-onyx);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .driver-phone-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .driver-phone {
+      color: var(--pz-energy);
+      font-weight: 700;
+      font-size: 0.95rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .driver-phone:hover {
+      color: var(--pz-energy-dark);
+      text-decoration: underline;
+    }
+
+    .copy-btn {
+      background: var(--pz-white);
+      border: 1.5px solid var(--pz-light);
+      color: var(--pz-grey);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--pz-onyx);
+      color: var(--pz-gold);
+      border-color: var(--pz-onyx);
+    }
+
+    .driver-note {
+      font-size: 0.85rem;
+      color: var(--pz-grey);
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .driver-note i {
+      color: var(--pz-gold-dark);
+    }
+
+    /* ========== FOOTER ========== */
+    .footer {
+      background: var(--pz-onyx);
+      padding: 80px 24px 30px;
+      margin-top: 80px;
+      color: var(--pz-white);
+      position: relative;
+    }
+
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: var(--gradient-gold);
+    }
+
+    .footer-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px 30px;
+    }
+
+    .footer-section h3 {
+      font-size: 1.2rem;
+      color: var(--pz-white);
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+      font-family: 'Montserrat', sans-serif;
+      position: relative;
+      padding-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .footer-section h3::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 40px; height: 3px;
+      background: var(--gradient-gold);
+      border-radius: 2px;
+    }
+
+    .footer-section p,
+    .footer-section a {
+      color: var(--pz-white);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .footer-section a:hover {
+      color: var(--pz-gold);
+      transform: translateX(5px);
+    }
+
+    .footer-section i {
+      color: var(--pz-gold);
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 45px;
+      height: 45px;
+      background: var(--pz-graphite);
+      border-radius: 50%;
+      color: var(--pz-white);
+      font-size: 1.2rem;
+      transition: var(--transition);
+      border: 1px solid var(--pz-charcoal);
+    }
+
+    .social-link:hover {
+      background: var(--gradient-gold);
+      color: var(--pz-onyx);
+      transform: translateY(-4px) rotate(5deg);
+      box-shadow: var(--shadow-gold);
+      border-color: var(--pz-gold);
+    }
+
+    .footer-bottom {
+      max-width: 1400px;
+      margin: 50px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--pz-charcoal);
+      text-align: center;
+      color: var(--pz-white);
+      font-size: 0.9rem;
+    }
+
+    .gold-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes slideIn {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px var(--pz-energy-glow), var(--shadow-energy); }
+      50% { box-shadow: 0 0 0 10px rgba(255, 77, 46, 0), var(--shadow-energy); }
+    }
+
+    /* ========== SCROLLBAR ========== */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--pz-cream); }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gradient-gold);
+      border-radius: 10px;
+      border: 2px solid var(--pz-cream);
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--pz-gold-dark); }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      .header-container { padding: 14px 20px; }
+      .logo img { height: 50px; }
+      .brand-name { font-size: 1.3rem; }
+      .header-btn { padding: 9px 14px; font-size: 0.85rem; }
+    }
+    
+    @media (max-width: 768px) {
+      .header-container { 
+        flex-direction: column; 
+        gap: 14px; 
+        padding: 14px 16px;
+      }
+      .logo { 
+        width: 100%; 
+        justify-content: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--pz-light);
+      }
+      .logo img { height: 48px; }
+      .brand-name { font-size: 1.4rem; }
+      .brand-tagline { font-size: 0.65rem; }
+      
+      .header-actions { 
+        width: 100%; 
+        justify-content: center;
+        gap: 8px;
+      }
+      .header-btn { 
+        padding: 8px 12px; 
+        font-size: 0.8rem;
+        flex: 1;
+        justify-content: center;
+        min-width: 0;
+      }
+      .header-btn span { display: none; }
+      .cart-btn span:first-of-type { display: inline; }
+
+      .tracking-container {
+        margin: 25px auto;
+        padding: 16px;
+      }
+
+      .tracking-card {
+        padding: 28px 22px;
+      }
+
+      .tracking-title h1 {
+        font-size: 1.4rem;
+      }
+
+      .search-form {
+        flex-direction: column;
+      }
+
+      .search-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .status-timeline {
+        padding-left: 36px;
+      }
+
+      .status-dot {
+        left: -30px;
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+      }
+
+      .driver-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+      }
+
+      .driver-phone-wrapper {
+        justify-content: center;
+      }
+
+      .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .info-value {
+        text-align: left;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-container { padding: 12px; }
+      .logo img { height: 42px; }
+      .brand-name { font-size: 1.2rem; letter-spacing: 1px; }
+      .brand-tagline { font-size: 0.6rem; letter-spacing: 2px; }
+      
+      .header-actions { gap: 6px; }
+      .header-btn { 
+        padding: 8px 10px; 
+        font-size: 0.75rem;
+        gap: 5px;
+      }
+      .header-btn i { font-size: 0.9rem; }
+      
+      .tracking-title h1 { font-size: 1.2rem; }
+      .tracking-title p { font-size: 0.85rem; }
+      .status-content h3 { font-size: 0.92rem; }
+      .status-content p { font-size: 0.8rem; }
+    }
+
+    @media (max-width: 360px) {
+      .header-btn { padding: 7px 8px; font-size: 0.7rem; }
+      .logo img { height: 38px; }
+      .brand-name { font-size: 1.1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  
+  <!-- Header موحد مع باقي الصفحات -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="HAKIM CHENAN NUTRITION Logo">
+        <div class="logo-text">
+          <div class="brand-name">HAKIM CHENAN</div>
+          <div class="brand-tagline">NUTRITION</div>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="tracking.html" class="header-btn active">
+          <i class="fa-solid fa-truck-fast"></i> 
+          <span>Suivi</span>
+        </a>
+        <button class="header-btn cart-btn" id="cartBtn">
+          <i class="fa-solid fa-cart-shopping"></i> 
+          <span>Panier</span>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <a href="compte.html" class="header-btn">
+          <i class="fa-solid fa-user"></i> 
+          <span>Compte</span>
+        </a>
+        <a href="devenir-revendeur.html" class="header-btn" style="border-color:var(--pz-gold); color:var(--pz-gold-dark);">
+          <i class="fa-solid fa-handshake"></i> 
+          <span>Revendeur</span>
+        </a>
+        <a href="couverture.html" class="header-btn">
+          <i class="fa-solid fa-map-location-dot"></i> 
+          <span>Couverture</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="tracking-container">
+    <div class="tracking-card">
+      
+      <!-- Title -->
+      <div class="tracking-title">
+        <h1>📦 Suivi de Commande</h1>
+        <p>Entrez votre numéro de commande pour consulter son statut</p>
+      </div>
+
+      <!-- Search Form -->
+      <form class="search-form" id="trackingForm">
+        <input type="text" class="search-input" id="orderNumber" placeholder="Ex: HCN260303001 ou PZ260303001" required maxlength="20">
+        <button type="submit" class="search-btn">
+          <i class="fa-solid fa-search"></i> Rechercher
+        </button>
+      </form>
+
+      <!-- Error Message -->
+      <div class="error-message" id="errorMessage">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Commande introuvable. Veuillez vérifier le numéro et réessayer.</span>
+      </div>
+
+      <!-- Tracking Result -->
+      <div id="trackingResult" style="display:none">
+        
+        <!-- Status Timeline -->
+        <div class="status-timeline">
+          <div class="status-item" id="status-pending">
+            <div class="status-dot"><i class="fa-solid fa-clock"></i></div>
+            <div class="status-content">
+              <h3>Commande Reçue</h3>
+              <p>Votre commande a été enregistrée avec succès</p>
+            </div>
+          </div>
+          <div class="status-item" id="status-accepted">
+            <div class="status-dot"><i class="fa-solid fa-check"></i></div>
+            <div class="status-content">
+              <h3>Commande Validée</h3>
+              <p>Votre commande est en cours de préparation</p>
+            </div>
+          </div>
+          <div class="status-item" id="status-shipped">
+            <div class="status-dot"><i class="fa-solid fa-truck"></i></div>
+            <div class="status-content">
+              <h3>En Livraison</h3>
+              <p>Votre commande est en route vers vous</p>
+            </div>
+          </div>
+          <div class="status-item" id="status-arrived">
+            <div class="status-dot"><i class="fa-solid fa-box"></i></div>
+            <div class="status-content">
+              <h3>Livrée</h3>
+              <p>Votre commande a été livrée avec succès</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="order-info">
+          <h3><i class="fa-solid fa-clipboard-list"></i> Détails de la Commande</h3>
+          <div class="info-row">
+            <span class="info-label">Numéro de commande</span>
+            <span class="info-value" id="info-orderNumber" style="color:var(--pz-gold-dark); font-weight:700;"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Date de commande</span>
+            <span class="info-value" id="info-date"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Nom du client</span>
+            <span class="info-value" id="info-client"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Téléphone</span>
+            <span class="info-value">
+              <a href="#" id="info-phone" onclick="return false;"></a>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Type de livraison</span>
+            <span class="info-value" id="info-type"></span>
+          </div>
+          <div class="info-row" style="border-top:2px solid var(--pz-light); padding-top:14px; margin-top:8px;">
+            <span class="info-label" style="font-weight:700; color:var(--pz-onyx);">Total à payer</span>
+            <span class="info-value" style="color:var(--pz-gold-dark); font-size:1.2rem; font-family:'Montserrat',sans-serif; font-weight:900;" id="info-total"></span>
+          </div>
+        </div>
+
+        <!-- Driver Info Section -->
+        <div id="driverInfo" class="driver-info">
+          <h3><i class="fa-solid fa-motorcycle"></i> Informations du Livreur</h3>
+          <div class="driver-card">
+            <div class="driver-avatar">
+              <i class="fa-solid fa-person-running"></i>
+            </div>
+            <div class="driver-details">
+              <div class="driver-name" id="driver-name"></div>
+              <div class="driver-phone-wrapper">
+                <a href="#" class="driver-phone" id="driver-phone" dir="ltr"></a>
+                <button class="copy-btn" id="copyPhoneBtn" onclick="copyDriverPhone(event)">
+                  <i class="fa-regular fa-copy"></i> Copier
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="driver-note">
+            <i class="fa-solid fa-circle-info"></i>
+            Contactez directement votre livreur pour suivre l'avancement de la livraison
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3><span class="gold-text">POWER</span>ZONE</h3>
+        <p>L'excellence n'est pas un acte, mais une habitude. Rejoignez le cercle des champions avec nos suppléments certifiés premium.</p>
+      </div>
+      <div class="footer-section">
+        <h3><span style="background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">HAKIM CHENAN</span> NUTRITION</h3>
+        <p>L'excellence n'est pas un acte, mais une habitude. Rejoignez le cercle des champions avec nos suppléments certifiés premium.</p>
+      </div>
+      <div class="footer-section">
+        <h3>QG COMMANDEMENT</h3>
+        <a href="tel:+213782945288">
+          <i class="fa-solid fa-phone"></i> 0782945288
+        </a>
+        <a href="mailto:contact@hakimchenan.dz">
+          <i class="fa-solid fa-envelope"></i> contact@hakimchenan.dz
+        </a>
+        <a href="https://maps.app.goo.gl/Ap2ccMBJmuJY2A7c7" target="_blank" rel="noopener">
+          <i class="fa-solid fa-location-crosshairs"></i> Voir sur Google Maps
+        </a>
+      </div>
+      <div class="footer-section">
+        <h3>SUIVEZ-NOUS</h3>
+        <div class="social-links">
+          <a href="https://www.facebook.com/share/1Dhn4AYi75/" target="_blank" rel="noopener" class="social-link" title="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          <a href="https://www.instagram.com/wahbi_zoghbi_nutrition?igsh=MW9lZ3huamI5ZnF3NQ==" target="_blank" rel="noopener" class="social-link" title="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://www.tiktok.com/@wahbi.zoghbinutrition?_r=1&_t=ZS-94QuUOKJNy9" target="_blank" rel="noopener" class="social-link" title="TikTok">
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h3>LOGISTIQUE</h3>
+        <p><i class="fa-solid fa-shield-halved"></i> Paiement 100% sécurisé à la livraison</p>
+        <p><i class="fa-solid fa-truck-fast"></i> Déploiement rapide sur les 58 wilayas</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <span id="currentYear"></span> HAKIM CHENAN NUTRITION. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    document.getElementById('trackingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const orderNumber = document.getElementById('orderNumber').value.trim().toUpperCase();
+      const errorMsg = document.getElementById('errorMessage');
+      const result = document.getElementById('trackingResult');
+      const searchBtn = document.querySelector('.search-btn');
+
+      if (!orderNumber) {
+        showError('Veuillez entrer un numéro de commande');
+        return;
+      }
+
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Recherche...';
+      errorMsg.classList.remove('show');
+      result.style.display = 'none';
+
+      try {
+        const q = query(collection(db, "commandes"), where("orderNumber", "==", orderNumber));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          showError('Aucune commande trouvée avec ce numéro');
+          return;
+        }
+
+        const order = snapshot.docs[0].data();
+        displayTracking(order);
+        
+      } catch (error) {
+        console.error("Erreur de suivi:", error);
+        showError('Erreur de connexion. Veuillez réessayer ultérieurement.');
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<i class="fa-solid fa-search"></i> Rechercher';
+      }
+    });
+
+    function showError(message) {
+      const errorMsg = document.getElementById('errorMessage');
+      errorMsg.querySelector('span').textContent = message;
+      errorMsg.classList.add('show');
+      document.getElementById('trackingResult').style.display = 'none';
+    }
+
+    function displayTracking(order) {
+      const result = document.getElementById('trackingResult');
+      result.style.display = 'block';
+
+      document.getElementById('info-orderNumber').textContent = '#' + order.orderNumber;
+      document.getElementById('info-date').textContent = new Date(order.date).toLocaleDateString('fr-FR', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      document.getElementById('info-client').textContent = `${order.firstName || ''} ${order.lastName || ''}`.trim();
+      
+      const phoneLink = document.getElementById('info-phone');
+      phoneLink.textContent = order.phone1 || '—';
+      phoneLink.href = order.phone1 ? `tel:${order.phone1.replace(/\s/g, '')}` : '#';
+      
+      document.getElementById('info-type').innerHTML = order.orderType === 'domicile' 
+        ? '<span style="color:var(--pz-energy); font-weight:700;"><i class="fa-solid fa-truck"></i> Livraison à domicile</span>' 
+        : '<span><i class="fa-solid fa-store"></i> Stop Desk</span>';
+      
+      document.getElementById('info-total').textContent = (order.grandTotal || 0).toFixed(2) + ' DA';
+
+      updateTimeline(order.status || 'pending');
+      showDriverInfo(order);
+    }
+
+    function updateTimeline(currentStatus) {
+      ['pending', 'accepted', 'shipped', 'arrived'].forEach(s => {
+        document.getElementById(`status-${s}`).classList.remove('active', 'completed');
+      });
+
+      const statusOrder = ['pending', 'accepted', 'shipped', 'arrived'];
+      const currentIndex = statusOrder.indexOf(currentStatus);
+
+      statusOrder.forEach((status, index) => {
+        const el = document.getElementById(`status-${status}`);
+        if (index < currentIndex) {
+          el.classList.add('completed');
+        } else if (index === currentIndex) {
+          el.classList.add('active');
+        }
+      });
+    }
+
+    function showDriverInfo(order) {
+      const driverSection = document.getElementById('driverInfo');
+      const isDomicile = order.orderType === 'domicile';
+      const isDelivering = ['shipped', 'arrived'].includes(order.status);
+      const hasDriver = order.driverName && order.driverPhone;
+
+      if (isDomicile && isDelivering && hasDriver) {
+        driverSection.classList.add('show');
+        document.getElementById('driver-name').textContent = order.driverName;
+        
+        const phone = order.driverPhone.replace(/\s/g, '');
+        const driverPhoneLink = document.getElementById('driver-phone');
+        driverPhoneLink.textContent = order.driverPhone;
+        driverPhoneLink.href = `tel:${phone}`;
+        driverPhoneLink.dataset.phone = order.driverPhone;
+      } else {
+        driverSection.classList.remove('show');
+      }
+    }
+
+    window.copyDriverPhone = function(e) {
+      e.preventDefault();
+      const phone = document.getElementById('driver-phone').dataset.phone;
+      
+      if (!phone) return;
+      
+      navigator.clipboard.writeText(phone).then(() => {
+        const btn = document.getElementById('copyPhoneBtn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copié !';
+        btn.style.borderColor = 'var(--pz-success)';
+        btn.style.color = 'var(--pz-success)';
+        
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }, 2000);
+      }).catch(err => {
+        console.error('Échec de la copie:', err);
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('orderNumber')?.focus();
+    });
+  </script>
+</body>
+</html>
