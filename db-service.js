@@ -1,5 +1,5 @@
 /**
- * Wahbi Zoghbi - Database Service
+ * Hakim Chenan - Database Service
  * Firebase Firestore + Cloudinary Integration
  * @version 1.0.0
  */
@@ -20,7 +20,7 @@ import { db } from "./firebase-config.js";
  * @param {string} folder - Optional folder name in Cloudinary
  * @returns {Promise<string>} - Secure URL of the uploaded image
  */
-export async function uploadImage(file, folder = 'wahbi-zoghbi') {
+export async function uploadImage(file, folder = 'hakim-chenan') {
     if (!file) return null;
     
     // ✅ Validate file type and size

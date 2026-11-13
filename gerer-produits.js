@@ -452,7 +452,7 @@ document.getElementById('editProductForm')?.addEventListener('submit', async (e)
                 if (fFile) {
                     try {
                         showNotification(`📤 Upload "${fName}"...`, 'info');
-                        fImg = await uploadImage(fFile, 'wahbi-zoghbi/flavors');
+                        fImg = await uploadImage(fFile, 'hakim-chenan/flavors');
                     } catch (err) {
                         console.error(err);
                         fImg = imageUrl; // Fallback to main image

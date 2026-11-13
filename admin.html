@@ -991,13 +991,15 @@
   <script>
     // 🔐 عرض اسم المستخدم من localStorage
     (function loadUserInfo() {
-      const userName = localStorage.getItem('userName');
-      if (userName) {
-        const userNameEl = document.getElementById('userName');
-        const userAvatarEl = document.getElementById('userAvatar');
-        if (userNameEl) userNameEl.textContent = userName;
-        if (userAvatarEl) userAvatarEl.textContent = userName.charAt(0).toUpperCase();
+      let userName = localStorage.getItem('userName');
+      if (!userName || userName.toLowerCase().includes('wahbi')) {
+        userName = 'Hakim';
+        localStorage.setItem('userName', 'Hakim');
       }
+      const userNameEl = document.getElementById('userName');
+      const userAvatarEl = document.getElementById('userAvatar');
+      if (userNameEl) userNameEl.textContent = userName;
+      if (userAvatarEl) userAvatarEl.textContent = userName.charAt(0).toUpperCase();
     })();
 
     // 🔐 دالة تسجيل الخروج
