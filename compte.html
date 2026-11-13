@@ -687,36 +687,132 @@
       loadCustomerOrders(user);
     }
 
-    // Load Customer Orders
+    // Status badge helper
+    function getOrderStatusBadge(status) {
+      switch (status) {
+        case 'pending':
+          return '<span style="background:rgba(255,184,0,0.15); color:var(--pz-gold-dark); padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;"><i class="fa-solid fa-clock"></i> En Attente</span>';
+        case 'confirmed':
+        case 'accepted':
+          return '<span style="background:rgba(59,130,246,0.15); color:var(--pz-info); padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;"><i class="fa-solid fa-check"></i> Confirmée</span>';
+        case 'shipped':
+          return '<span style="background:rgba(16,185,129,0.15); color:var(--pz-success); padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;"><i class="fa-solid fa-truck"></i> Expédiée</span>';
+        case 'delivered':
+          return '<span style="background:rgba(16,185,129,0.25); color:var(--pz-success); padding:3px 8px; border-radius:4px; font-weight:800; font-size:0.75rem;"><i class="fa-solid fa-box-archive"></i> Livrée</span>';
+        case 'cancelled':
+        case 'returned':
+          return '<span style="background:rgba(239,68,68,0.15); color:var(--pz-danger); padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;"><i class="fa-solid fa-xmark"></i> Annulée</span>';
+        default:
+          return `<span style="background:var(--pz-light); color:var(--pz-grey); padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;">${status || 'En cours'}</span>`;
+      }
+    }
+
+    // Load Customer Orders with full purchase history (NO composite index needed)
     async function loadCustomerOrders(user) {
       const container = document.getElementById('ordersContainer');
-      try {
-        const q = query(collection(db, "commandes"), where("phone1", "==", user.phone), orderBy("date", "desc"));
-        const snap = await getDocs(q);
+      container.innerHTML = '<p style="text-align:center; color:var(--pz-grey); padding:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement de votre historique...</p>';
 
-        if (snap.empty) {
-          container.innerHTML = '<p style="text-align:center; color:var(--pz-grey); padding:30px;">Aucune commande enregistrée pour ce numéro.</p>';
+      try {
+        const ordersMap = new Map();
+
+        // 1. Recherche par numéro de téléphone
+        if (user.phone) {
+          const q1 = query(collection(db, "commandes"), where("phone1", "==", user.phone));
+          const snap1 = await getDocs(q1);
+          snap1.docs.forEach(d => ordersMap.set(d.id, { id: d.id, ...d.data() }));
+        }
+
+        // 2. Recherche par customerId
+        const uid = user.id || user.uid;
+        if (uid) {
+          const q2 = query(collection(db, "commandes"), where("customerId", "==", uid));
+          const snap2 = await getDocs(q2);
+          snap2.docs.forEach(d => ordersMap.set(d.id, { id: d.id, ...d.data() }));
+        }
+
+        const orders = Array.from(ordersMap.values());
+
+        // Tri côté client par date décroissante (évite l'erreur d'index Firestore)
+        orders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+        if (orders.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:40px 20px; color:var(--pz-grey);">
+              <i class="fa-solid fa-cart-shopping" style="font-size:2.5rem; color:var(--pz-silver); margin-bottom:12px;"></i>
+              <p style="font-size:1.05rem; font-weight:700; color:var(--pz-onyx);">Vous n'avez pas encore passé de commande.</p>
+              <p style="font-size:0.85rem; margin-top:4px;">Vos achats et le suivi de vos colis apparaîtront ici.</p>
+              <a href="index.html" class="btn btn-primary" style="margin-top:16px; display:inline-flex;">
+                <i class="fa-solid fa-bag-shopping"></i> Découvrir le Catalogue
+              </a>
+            </div>
+          `;
           return;
         }
 
-        container.innerHTML = snap.docs.map(docSnap => {
-          const cmd = docSnap.data();
-          const dateStr = cmd.date ? new Date(cmd.date).toLocaleDateString('fr-FR') : '—';
+        const totalSpent = orders.reduce((sum, o) => sum + (Number(o.grandTotal) || 0), 0);
+
+        let html = `
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
+            <div style="background:var(--pz-cream); border:1px solid var(--pz-light); padding:14px; border-radius:var(--radius); text-align:center;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--pz-grey); font-weight:700;">Total Commandes</div>
+              <div style="font-size:1.4rem; font-weight:900; color:var(--pz-onyx); font-family:'Montserrat',sans-serif;">${orders.length} achat${orders.length > 1 ? 's' : ''}</div>
+            </div>
+            <div style="background:var(--pz-cream); border:1px solid var(--pz-light); padding:14px; border-radius:var(--radius); text-align:center;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--pz-grey); font-weight:700;">Total Dépensé</div>
+              <div style="font-size:1.4rem; font-weight:900; color:var(--pz-gold-dark); font-family:'Montserrat',sans-serif;">${totalSpent.toFixed(2)} DA</div>
+            </div>
+          </div>
+        `;
+
+        html += orders.map(cmd => {
+          const dateStr = cmd.date ? new Date(cmd.date).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+          const items = Array.isArray(cmd.cartItems) ? cmd.cartItems : [];
+
+          const itemsListHtml = items.map(item => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--pz-light); font-size:0.85rem;">
+              <div>
+                <strong style="color:var(--pz-onyx);">${item.name || 'Produit'}</strong>
+                ${item.flavor ? `<span style="font-size:0.75rem; color:var(--pz-grey); margin-left:6px;">• ${item.flavor}</span>` : ''}
+                <div style="font-size:0.75rem; color:var(--pz-grey);">Quantité : ${item.quantity || 1} × ${(Number(item.price) || 0).toFixed(2)} DA</div>
+              </div>
+              <div style="font-weight:700; color:var(--pz-dark);">
+                ${(Number(item.total || (item.price * item.quantity)) || 0).toFixed(2)} DA
+              </div>
+            </div>
+          `).join('');
+
           return `
             <div class="order-card">
               <div class="order-card-header">
                 <div>
-                  <span class="order-card-num">#${cmd.orderNumber}</span>
+                  <span class="order-card-num">#${cmd.orderNumber || 'CMD'}</span>
                   <span style="font-size:0.8rem; color:var(--pz-grey); margin-left:10px;">${dateStr}</span>
                 </div>
-                <div class="order-card-total">${(cmd.grandTotal || 0).toFixed(2)} DA</div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  ${getOrderStatusBadge(cmd.status)}
+                  <div class="order-card-total">${(Number(cmd.grandTotal) || 0).toFixed(2)} DA</div>
+                </div>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.85rem;">
+
+              <!-- Détail de tous les achats de cette commande -->
+              <div style="background:var(--pz-cream); border-radius:6px; padding:10px 14px; margin:10px 0;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--pz-grey); margin-bottom:6px;">
+                  <i class="fa-solid fa-basket-shopping"></i> Articles achetés (${items.length})
+                </div>
+                ${itemsListHtml || '<div style="color:var(--pz-grey); font-size:0.85rem;">Détail des articles indisponible</div>'}
+                <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:6px; border-top:1px solid var(--pz-light); font-size:0.8rem; color:var(--pz-grey);">
+                  <span>Frais de livraison (${cmd.orderType === 'domicile' ? 'À Domicile' : 'Stop Desk'}) :</span>
+                  <span>${(Number(cmd.shippingPrice) || 0).toFixed(2)} DA</span>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.85rem; margin-top:8px;">
                 <div>
-                  <span style="color:var(--pz-grey);">Livraison :</span> <strong>${cmd.orderType === 'domicile' ? 'À Domicile' : 'Stop Desk'}</strong> (${cmd.wilaya})
+                  <i class="fa-solid fa-location-dot" style="color:var(--pz-gold-dark);"></i>
+                  <strong>${cmd.wilaya || ''}</strong> ${cmd.commune ? `- ${cmd.commune}` : ''}
                 </div>
                 <div>
-                  <a href="tracking.html?order=${cmd.orderNumber}" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                  <a href="tracking.html?order=${cmd.orderNumber || ''}" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
                     <i class="fa-solid fa-truck-fast"></i> Suivre cette commande
                   </a>
                 </div>
@@ -724,6 +820,8 @@
             </div>
           `;
         }).join('');
+
+        container.innerHTML = html;
 
       } catch (err) {
         console.error("Orders error:", err);

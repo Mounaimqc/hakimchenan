@@ -20,19 +20,21 @@ export function sanitizeImageUrl(url) {
   if (!url || typeof url !== 'string') return '';
   url = url.trim();
   if (!url) return '';
+
+  const match = url.match(/[?&]url=([^&]+)/i);
+  if (match && match[1]) {
+    try {
+      const decoded = decodeURIComponent(match[1]);
+      if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+        return decoded;
+      }
+    } catch (e) {}
+  }
+
   if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') && !url.startsWith('blob:')) {
     url = 'https://' + url;
   }
-  if (url.includes('/_next/image') || url.includes('/_ipx/')) {
-    try {
-      const parsed = new URL(url);
-      const target = parsed.searchParams.get('url');
-      if (target) return decodeURIComponent(target);
-    } catch (e) {
-      const match = url.match(/[?&]url=([^&]+)/);
-      if (match) return decodeURIComponent(match[1]);
-    }
-  }
+
   return url;
 }
 
@@ -439,12 +441,20 @@ function displayResellers(resellers) {
 
     const dateStr = r.appliedAt ? new Date(r.appliedAt).toLocaleDateString('fr-FR') : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—');
 
+    const resellerOrders = allCommandes.filter(cmd => (cmd.phone1 && cmd.phone1 === r.phone) || (cmd.customerId && cmd.customerId === r.id));
+    const orderCount = resellerOrders.length;
+    const totalSpent = resellerOrders.reduce((sum, cmd) => sum + (Number(cmd.grandTotal) || 0), 0);
+    const purchasesHtml = orderCount > 0
+      ? `<span style="font-weight:700; color:var(--primary);">${orderCount} achat${orderCount > 1 ? 's' : ''}</span><div style="font-size:0.75rem; color:var(--text-light);">${totalSpent.toFixed(2)} DA</div>`
+      : `<span style="color:var(--text-light); font-size:0.8rem;">0 achat</span>`;
+
     return `
       <tr>
         <td style="font-weight:600;">${r.fullName || (r.firstName + ' ' + r.lastName)}</td>
         <td><a href="tel:${r.phone}" style="color:var(--primary); font-weight:600;">${r.phone || '—'}</a></td>
         <td>${r.wilaya || '—'} ${r.commune ? '• ' + r.commune : ''}</td>
         <td>${r.businessName ? `<strong>${r.businessName}</strong>` : '<span style="color:var(--text-light)">—</span>'}</td>
+        <td>${purchasesHtml}</td>
         <td>${dateStr}</td>
         <td>${statusBadge}</td>
         <td>
@@ -531,6 +541,13 @@ function displayCustomers(customers) {
 
     const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '—';
 
+    const customerOrders = allCommandes.filter(cmd => (cmd.phone1 && cmd.phone1 === c.phone) || (cmd.customerId && cmd.customerId === c.id));
+    const orderCount = customerOrders.length;
+    const totalSpent = customerOrders.reduce((sum, cmd) => sum + (Number(cmd.grandTotal) || 0), 0);
+    const purchasesHtml = orderCount > 0
+      ? `<span style="font-weight:700; color:var(--primary);">${orderCount} achat${orderCount > 1 ? 's' : ''}</span><div style="font-size:0.75rem; color:var(--text-light);">${totalSpent.toFixed(2)} DA</div>`
+      : `<span style="color:var(--text-light); font-size:0.8rem;">0 achat</span>`;
+
     return `
       <tr>
         <td style="font-weight:600;">${c.firstName || ''} ${c.lastName || ''}</td>
@@ -539,6 +556,7 @@ function displayCustomers(customers) {
         <td>${c.wilaya || '—'} ${c.commune ? '• ' + c.commune : ''}</td>
         <td>${roleBadge}</td>
         <td>${statusBadge}</td>
+        <td>${purchasesHtml}</td>
         <td>${dateStr}</td>
         <td>
           <button onclick="showCustomerDetail('${c.id}')" style="padding:6px 12px; background:var(--primary); color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Détails</button>
@@ -680,32 +698,84 @@ window.showCustomerDetail = showCustomerDetail;
 
 async function loadCustomerOrdersInModal(phone, customerId) {
   const container = document.getElementById('cdOrdersContainer');
+  const summaryBadge = document.getElementById('cdOrdersSummaryBadge');
   if (!container) return;
 
-  container.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Recherche des commandes...</p>';
+  container.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:15px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement des achats...</p>';
 
   try {
-    const orders = allCommandes.filter(c => (c.phone1 === phone) || (c.customerId === customerId));
+    const orders = allCommandes.filter(c => (c.phone1 && c.phone1 === phone) || (c.customerId && c.customerId === customerId));
+    
+    // Sort by date descending
+    orders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    const totalSpent = orders.reduce((sum, cmd) => sum + (Number(cmd.grandTotal) || 0), 0);
+    
+    if (summaryBadge) {
+      summaryBadge.innerHTML = orders.length > 0 
+        ? `<i class="fa-solid fa-chart-line"></i> ${orders.length} commande${orders.length > 1 ? 's' : ''} • Total : ${totalSpent.toFixed(2)} DA`
+        : `0 commande enregistrée`;
+    }
+
     if (orders.length === 0) {
-      container.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:10px;">Aucune commande trouvée pour ce client.</p>';
+      container.innerHTML = `
+        <div style="text-align:center; color:var(--text-light); padding:30px 15px;">
+          <i class="fa-solid fa-box-open" style="font-size:2rem; margin-bottom:8px; opacity:0.5;"></i>
+          <p>Aucun achat enregistré pour ce client pour le moment.</p>
+        </div>
+      `;
       return;
     }
 
-    container.innerHTML = orders.map(cmd => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid var(--border); font-size:0.85rem;">
-        <div>
-          <strong style="color:var(--primary);">#${cmd.orderNumber}</strong>
-          <span style="color:var(--text-light); margin-left:8px;">${cmd.date ? new Date(cmd.date).toLocaleDateString('fr-FR') : ''}</span>
-          <span class="status-badge ${getStatusClass(cmd.status)}" style="margin-left:8px; font-size:0.7rem;">${getStatusLabel(cmd.status)}</span>
+    container.innerHTML = orders.map(cmd => {
+      const dateStr = cmd.date ? new Date(cmd.date).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+      const items = Array.isArray(cmd.cartItems) ? cmd.cartItems : [];
+
+      const itemsHtml = items.map(item => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:0.8rem; border-bottom:1px dashed rgba(255,255,255,0.07);">
+          <div>
+            <strong style="color:var(--text);">${item.name || 'Produit'}</strong>
+            ${item.flavor ? `<span style="color:var(--text-light); margin-left:4px;">(${item.flavor})</span>` : ''}
+            <span style="color:var(--text-light); margin-left:6px;">× ${item.quantity || 1}</span>
+          </div>
+          <div style="color:var(--primary); font-weight:600;">
+            ${(Number(item.total || (item.price * item.quantity)) || 0).toFixed(2)} DA
+          </div>
         </div>
-        <div style="font-weight:700; color:var(--primary);">
-          ${(cmd.grandTotal || 0).toFixed(2)} DA
+      `).join('');
+
+      return `
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <div>
+              <strong style="color:var(--primary); font-size:0.95rem;">#${cmd.orderNumber || 'CMD'}</strong>
+              <span style="color:var(--text-light); font-size:0.8rem; margin-left:8px;">${dateStr}</span>
+              <span class="status-badge ${getStatusClass(cmd.status)}" style="margin-left:8px; font-size:0.7rem;">${getStatusLabel(cmd.status)}</span>
+              ${cmd.isWholesaleOrder ? `<span style="background:rgba(255,184,0,0.2); color:var(--primary); padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:700; margin-left:4px;">GROS</span>` : ''}
+            </div>
+            <div style="font-weight:800; color:var(--primary); font-size:1.05rem;">
+              ${(Number(cmd.grandTotal) || 0).toFixed(2)} DA
+            </div>
+          </div>
+
+          <!-- Liste des articles -->
+          <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:8px 12px; margin:8px 0;">
+            <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-light); margin-bottom:4px; font-weight:700;">
+              Articles achetés (${items.length})
+            </div>
+            ${itemsHtml || '<span style="color:var(--text-light); font-size:0.8rem;">Détail articles non spécifié</span>'}
+            <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.75rem; color:var(--text-light);">
+              <span>Livraison (${cmd.orderType === 'domicile' ? 'Domicile' : 'Stop Desk'} - ${cmd.wilaya || '—'}) :</span>
+              <span>${(Number(cmd.shippingPrice) || 0).toFixed(2)} DA</span>
+            </div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
   } catch (e) {
-    container.innerHTML = '<p style="text-align:center; color:var(--danger);">Erreur chargement commandes</p>';
+    console.error("Error loading modal customer orders:", e);
+    container.innerHTML = '<p style="text-align:center; color:var(--danger); padding:10px;">Erreur chargement des achats</p>';
   }
 }
 

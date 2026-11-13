@@ -32,23 +32,25 @@ export function sanitizeImageUrl(url) {
   if (!url || typeof url !== 'string') return '';
   url = url.trim();
   if (!url) return '';
-  // Fix protocol if missing
+
+  // 1. Détection de tout proxy d'image avec paramètre ?url= ou &url= (Next.js, Novasell, etc.)
+  const match = url.match(/[?&]url=([^&]+)/i);
+  if (match && match[1]) {
+    try {
+      const decoded = decodeURIComponent(match[1]);
+      if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+        return decoded;
+      }
+    } catch (e) {
+      console.warn("Erreur décodage URL:", e);
+    }
+  }
+
+  // 2. Ajout du protocole si manquant
   if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') && !url.startsWith('blob:')) {
     url = 'https://' + url;
   }
-  // If URL is a Next.js / Nuxt / external image proxy (e.g. coach.novasell.store/_next/image?url=...)
-  if (url.includes('/_next/image') || url.includes('/_ipx/')) {
-    try {
-      const parsed = new URL(url);
-      const target = parsed.searchParams.get('url');
-      if (target) {
-        return decodeURIComponent(target);
-      }
-    } catch (e) {
-      const match = url.match(/[?&]url=([^&]+)/);
-      if (match) return decodeURIComponent(match[1]);
-    }
-  }
+
   return url;
 }
 

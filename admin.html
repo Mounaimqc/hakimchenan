@@ -450,6 +450,7 @@
                 <th>Téléphone</th>
                 <th>Wilaya / Commune</th>
                 <th>Établissement / Magasin</th>
+                <th>Achats (Total)</th>
                 <th>Date Demande</th>
                 <th>Statut</th>
                 <th>Actions</th>
@@ -536,6 +537,7 @@
                 <th>Wilaya / Commune</th>
                 <th>Rôle</th>
                 <th>Statut</th>
+                <th>Achats (Total)</th>
                 <th>Inscription</th>
                 <th>Actions</th>
               </tr>
@@ -699,8 +701,11 @@
         <div class="detail-row"><span class="detail-label">📝 Informations / Notes</span><span class="detail-value" id="cdNotes">—</span></div>
         <div class="detail-row"><span class="detail-label">📅 Date de création</span><span class="detail-value" id="cdCreatedAt">—</span></div>
 
-        <h4 style="margin:24px 0 12px; font-size:1rem; font-family:'Montserrat',sans-serif;">📦 Commandes de ce Client</h4>
-        <div id="cdOrdersContainer" style="max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius); padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:24px 0 12px; flex-wrap:wrap; gap:8px;">
+          <h4 style="font-size:1.05rem; font-family:'Montserrat',sans-serif; margin:0; color:var(--text);"><i class="fa-solid fa-receipt"></i> Historique de Tous les Achats du Client</h4>
+          <span id="cdOrdersSummaryBadge" style="font-size:0.85rem; color:var(--primary); font-weight:700;"></span>
+        </div>
+        <div id="cdOrdersContainer" style="max-height:350px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius); padding:12px; background:var(--bg);">
           <p style="text-align:center; color:var(--text-light); padding:15px;">Chargement des commandes...</p>
         </div>
       </div>
